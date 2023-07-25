@@ -17,7 +17,7 @@ class RGBLED {
 
   // sets up the communication pins
   void begin() {
-  	pinMode(r_, OUTPUT);
+    pinMode(r_, OUTPUT);
     pinMode(g_, OUTPUT);
     pinMode(b_, OUTPUT);
   }
