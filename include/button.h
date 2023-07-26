@@ -5,19 +5,17 @@ namespace PTS {
 
 #include <Arduino.h>
 
-// Own constants to keep track of a button's state.
-// (the problem with arduino's implementation is that HIGH and RISING states are conflicting,
-// enums are wonky and kinda kill it without their specific headers,
-// are #defines better? genuinely not sure in this case?
-// inline vars are c++17, only gives a warning but keep in mind)
-const inline byte IS_RISING   = 0b01;
-const inline byte IS_FALLING  = 0b10;
-const inline byte IS_PRESSED  = 0b11;
-const inline byte IS_RELEASED = 0b00;
-
 // Utility class to link button state changes to callback functions
 class Button {
  public:
+  // Own constants as enum to keep track of a button's state.
+  enum StateChange : byte {
+      IS_RISING   = 0b01,
+      IS_FALLING  = 0b10,
+      IS_PRESSED  = 0b11,
+      IS_RELEASED = 0b00
+  };
+
   Button(uint8_t pin) : pin_(pin), state_(LOW),
     on_rising_(nullptr),
     on_falling_(nullptr),
@@ -36,10 +34,10 @@ class Button {
 
   // determines what state change has happened to the button,
   // can detect rising and falling as well as simple high and low states (press and release)
-  byte getStateChange() {
-    byte change = static_cast<byte>(0b00);
-    if (state_ == HIGH) change = static_cast<byte>(change | 0b10); // old state
-    if (read() == HIGH) change = static_cast<byte>(change | 0b01); // new state
+  StateChange getStateChange() {
+    StateChange change = static_cast<StateChange>(0b00);
+    if (state_ == HIGH) change = static_cast<StateChange>(change | 0b10); // old state
+    if (read() == HIGH) change = static_cast<StateChange>(change | 0b01); // new state
     return change;
   }
   
