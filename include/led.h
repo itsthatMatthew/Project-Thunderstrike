@@ -11,18 +11,18 @@ class LED {
   LED(uint8_t pin) : pin_(pin) { }
 
   // sets up the communication pin
-  void begin() {
+  void begin() const {
   	pinMode(pin_, OUTPUT);
   }
 
   // turns the LED on
-  void on() { digitalWrite(pin_, HIGH); }
+  void on() const { digitalWrite(pin_, HIGH); }
 
   // turns the LED off
-  void off() { digitalWrite(pin_, LOW); }
+  void off() const { digitalWrite(pin_, LOW); }
 
  private:
-  uint8_t pin_;
+  const uint8_t pin_;
 }; /* class LED */
 
 }; /* namespace PTS */

@@ -16,72 +16,72 @@ class RGBLED {
   { }
 
   // sets up the communication pins
-  void begin() {
+  void begin() const {
     pinMode(r_, OUTPUT);
     pinMode(g_, OUTPUT);
     pinMode(b_, OUTPUT);
   }
 
   // sets the color red
-  void red() {
+  void red() const {
     digitalWrite(r_, HIGH);
     digitalWrite(g_, LOW);
     digitalWrite(b_, LOW);
   }
 
   // sets the color green
-  void green() {
+  void green() const {
     digitalWrite(r_, LOW);
     digitalWrite(g_, HIGH);
     digitalWrite(b_, LOW);
   }
 
   // sets the color blue
-  void blue() {
+  void blue() const {
     digitalWrite(r_, LOW);
     digitalWrite(g_, LOW);
     digitalWrite(b_, HIGH);
   }
 
   // sets the color cyan
-  void cyan() {
+  void cyan() const {
     digitalWrite(r_, LOW);
     digitalWrite(g_, HIGH);
     digitalWrite(b_, HIGH);
   }
 
   // sets the color yellow
-  void yellow() {
+  void yellow() const {
     digitalWrite(r_, HIGH);
     digitalWrite(g_, HIGH);
     digitalWrite(b_, LOW);
   }
 
   // sets the color magenta
-  void magenta() {
+  void magenta() const {
     digitalWrite(r_, HIGH);
     digitalWrite(g_, LOW);
     digitalWrite(b_, HIGH);
   }
 
   // sets the color white by turning all LEDs on
-  void white() {
+  void white() const {
     digitalWrite(r_, HIGH);
     digitalWrite(g_, HIGH);
     digitalWrite(b_, HIGH);
   }
 
   // turns the LED off
-  void off() {
+  void off() const {
     digitalWrite(r_, LOW);
     digitalWrite(g_, LOW);
     digitalWrite(b_, LOW);
   }
 
  private:
-  uint8_t r_;
-  uint8_t g_;
-  uint8_t b_;
+  const uint8_t r_;
+  const uint8_t g_;
+  const uint8_t b_;
 }; /* class RGBLED */
 
 }; /* namespace PTS */
