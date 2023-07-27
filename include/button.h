@@ -24,17 +24,17 @@ class Button {
    { }
   
   // sets up the communication pin and reads a beginning state
-  void begin() {
+  void begin() const {
   	pinMode(pin_, INPUT);
     read();
   }
   
   // reads the new state, stores and returns it
-  byte read() { return state_ = digitalRead(pin_); }
+  byte read() const { return state_ = digitalRead(pin_); }
 
   // determines what state change has happened to the button,
   // can detect rising and falling as well as simple high and low states (press and release)
-  StateChange getStateChange() {
+  StateChange getStateChange() const {
     StateChange change = static_cast<StateChange>(0b00);
     if (state_ == HIGH) change = static_cast<StateChange>(change | 0b10); // old state
     if (read() == HIGH) change = static_cast<StateChange>(change | 0b01); // new state
@@ -42,7 +42,7 @@ class Button {
   }
   
   // executes the correct callback depending on the buttons state and/or change
-  void update() {
+  void update() const {
     switch (getStateChange()) {
       case IS_RISING: if (on_rising_) on_rising_(); break;
       case IS_FALLING: if (on_falling_) on_falling_(); break;
@@ -51,20 +51,20 @@ class Button {
     }
   }
   
-  void onRising(void (*callback)(void)) { on_rising_ = callback; }
-  void onFalling(void (*callback)(void)) { on_falling_ = callback; }
-  void onPressed(void (*callback)(void)) { on_pressed_ = callback; }
-  void onReleased(void (*callback)(void)) { on_released_ = callback; }
+  void onRising(void (*callback)(void)) const { on_rising_ = callback; }
+  void onFalling(void (*callback)(void)) const { on_falling_ = callback; }
+  void onPressed(void (*callback)(void)) const { on_pressed_ = callback; }
+  void onReleased(void (*callback)(void)) const { on_released_ = callback; }
   
  private:
   // inner vars:
-  uint8_t pin_; // the connected gpio pin
-  byte state_;  // the buttons state (since it's last update, used to calculate state changes)
+  const uint8_t pin_; // the connected gpio pin
+  mutable byte state_;  // the buttons state (since it's last update, used to calculate state changes)
   // callbacks:
-  void (*on_rising_)(void);
-  void (*on_falling_)(void);
-  void (*on_pressed_)(void);
-  void (*on_released_)(void);
+  mutable void (*on_rising_)(void);
+  mutable void (*on_falling_)(void);
+  mutable void (*on_pressed_)(void);
+  mutable void (*on_released_)(void);
 }; /* class Button */
 
 }; /* namespace PTS */
