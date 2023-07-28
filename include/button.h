@@ -33,13 +33,13 @@ class Button {
   byte readNewState() const { return state_ = digitalRead(pin_); }
 
   // returns the current state (HIGH or LOW)
-  [[nodiscard]] byte getCurrentState() const { return state_; }
+  [[nodiscard]] byte currentState() const { return state_; }
 
   // determines what state change has happened to the button,
   // can detect rising and falling as well as simple high and low states (press and release)
   StateChange getStateChange() const {
     StateChange change = static_cast<StateChange>(0b00);
-    if (state_ == HIGH) change = static_cast<StateChange>(change | 0b10); // old state
+    if (currentState() == HIGH) change = static_cast<StateChange>(change | 0b10); // old state
     if (readNewState() == HIGH) change = static_cast<StateChange>(change | 0b01); // new state
     return change;
   }
