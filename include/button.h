@@ -16,7 +16,7 @@ class Button {
       IS_RELEASED = 0b00
   };
 
-  Button(uint8_t pin) : pin_(pin), state_(LOW),
+  explicit Button(uint8_t pin) : pin_(pin), state_(LOW),
     on_rising_(nullptr),
     on_falling_(nullptr),
     on_pressed_(nullptr),

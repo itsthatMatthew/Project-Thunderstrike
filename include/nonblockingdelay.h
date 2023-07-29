@@ -9,7 +9,7 @@ namespace PTS {
 // Must be init as a global var or a local static to function properly.
 class NonBlockingDelay {
  public:
-  NonBlockingDelay(size_t delay) : delay_(delay), start_(0), active_(true) { }
+  explicit NonBlockingDelay(size_t delay) : delay_(delay), start_(0), active_(true) { }
   
   // For the object to be placed at the top fo a block with an if(obj) as a guard.
   // @returns true, if the correct amount of time has passed;
