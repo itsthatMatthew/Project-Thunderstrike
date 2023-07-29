@@ -8,7 +8,7 @@ namespace PTS {
 // Utility class for 2 leg single color LEDs
 class LED {
  public:
-  explicit LED(uint8_t pin) : pin_(pin) { }
+  explicit LED(const uint8_t pin) : pin_(pin) { }
 
   // sets up the communication pin
   void begin() const {

@@ -11,7 +11,7 @@ namespace PTS {
 // R : G : B resistors *should* be around 18 : 4 : 3
 class RGBLED {
  public:
-  explicit RGBLED(uint8_t red_pin, uint8_t green_pin, uint8_t blue_pin)
+  explicit RGBLED(const uint8_t red_pin, const uint8_t green_pin, const uint8_t blue_pin)
     : r_(red_pin), g_(green_pin), b_(blue_pin)
   { }
 
