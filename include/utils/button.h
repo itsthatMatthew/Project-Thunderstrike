@@ -6,6 +6,7 @@ namespace PTS {
 #include <Arduino.h>
 
 // Utility class to link button state changes to callback functions
+template<typename CALLBACK_TYPE = void(*)(void)>
 class Button {
  public:
   // Own constants as enum to keep track of a button's state.
@@ -54,20 +55,20 @@ class Button {
     }
   }
   
-  void onRising(void (*callback)(void)) const { on_rising_ = callback; }
-  void onFalling(void (*callback)(void)) const { on_falling_ = callback; }
-  void onPressed(void (*callback)(void)) const { on_pressed_ = callback; }
-  void onReleased(void (*callback)(void)) const { on_released_ = callback; }
+  void onRising(CALLBACK_TYPE callback) const { on_rising_ = callback; }
+  void onFalling(CALLBACK_TYPE callback) const { on_falling_ = callback; }
+  void onPressed(CALLBACK_TYPE callback) const { on_pressed_ = callback; }
+  void onReleased(CALLBACK_TYPE callback) const { on_released_ = callback; }
   
  private:
   // inner vars:
   const uint8_t pin_; // the connected gpio pin
   mutable byte state_;  // the buttons state (since it's last update, used to calculate state changes)
   // callbacks:
-  mutable void (*on_rising_)(void);
-  mutable void (*on_falling_)(void);
-  mutable void (*on_pressed_)(void);
-  mutable void (*on_released_)(void);
+  mutable CALLBACK_TYPE on_rising_;
+  mutable CALLBACK_TYPE on_falling_;
+  mutable CALLBACK_TYPE on_pressed_;
+  mutable CALLBACK_TYPE on_released_;
 }; /* class Button */
 
 }; /* namespace PTS */
