@@ -25,7 +25,7 @@ class Button {
   
   // sets up the communication pin and reads a beginning state
   void begin() const {
-  	pinMode(pin_, INPUT);
+    pinMode(pin_, INPUT);
     readNewState();
   }
   
