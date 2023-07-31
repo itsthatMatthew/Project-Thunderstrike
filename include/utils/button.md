@@ -38,3 +38,44 @@ void loop() {
   button.update();
 }
 ```
+
+## The fancy stuff
+
+Buttons support extra features as template arguments for minimal overhead. These two are teh callback types and delay policy. Let's walk trough what these two mean if you wanted to use them.
+
+### Delay policies
+
+Delay policies are here for one main reason: for debouncing your circuit in software. Since you mihgt miss hardware implementation or have limited resources to do so, a simple delay might be enough for a shell-proof design. It's the first template paramteres, the default value being the `NoDelayPolicy` struct. This simply adds no delay, with zero overhead. For your implementation, simply declare a struct with a single `static constexpr void delay()` method, this will be called once in `update()`, and this declaration makes sure to have minimal overhead.
+
+### Callback return types & arugments
+
+Since callback types are templated, you can tailor them to your needs. The second template argument for the `Button` class is the desired return type, the default being `void`. Any additional parameters after this will determine the argument list for the callbacks, which can be passed in the `update()` method. Beware that all callbacks must share the same declaration.
+
+## Example for a Button object with specific template arguments:
+
+```cpp
+#include "utils/button.h"
+
+// A custom delay struct, yours should look alike (templates for params and constexpr)
+template<uint32_t millis>
+struct ArduinoDelayPolicy {
+  static constexpr void delay() { ::delay(millis); }
+};
+
+Button<ArduinoDelayPolicy, int, float, double> button(GPIO_PIN_NUM);
+//     ^                   ^    ^-- these are the callback arguments
+//     \                   \-- this is the return type of the callback
+//     \-- this will be the delay policy
+
+void setup() {
+  button.begin();
+
+// callback with lambda expression, correct paramteres and return type:
+  button.onRising( [](float, double) -> int { /* Code to execute when button is pressed. */ } );
+}
+
+void loop() {
+// preiodically called update() for correct behaviour:
+  int x = button.update(1.41f, 3.14);
+}
+```
