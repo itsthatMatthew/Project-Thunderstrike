@@ -9,19 +9,26 @@ namespace PTS {
 // A delay policy should have a single public static constexpr delay() method,
 // this is called in update() before the actual callbacks.
 // An empty delay adds zero overhead, simple delays get compiled away very efficiently.
-struct DelayPolicy {
+struct NoDelayPolicy {
   static constexpr void delay() { };
 };
 
+// Simple delay policy with the use of the Arduino framework's delay() method.
+// For the best optimization use templates and constexpr wherever you can.
 template<uint32_t millis>
 struct ArduinoDelayPolicy {
   static constexpr void delay() { ::delay(millis); }
 };
 
 // Utility class to link button state changes to callback functions
-template<typename CALLBACK_TYPE = void(*)(void) , typename DELAY_POLICY = DelayPolicy>
+template<
+  typename DELAY_POLICY = NoDelayPolicy, // for software debounce delay
+  typename RET = void, typename... ARGS  // for custom callback parameters
+>
 class Button {
  public:
+  using CALLBACK_TYPE = RET(*)(ARGS...);
+
   // Own constants as enum to keep track of a button's state.
   enum StateChange : byte {
       IS_RELEASED = 0b00,
@@ -59,12 +66,12 @@ class Button {
   }
   
   // executes the correct callback depending on the buttons state and/or change
-  void update() const {
+  auto update(ARGS... args) const -> RET {
     switch (getStateChange()) {
-      case IS_RISING: if (on_rising_) DELAY_POLICY::delay(); on_rising_(); break;
-      case IS_FALLING: if (on_falling_) DELAY_POLICY::delay(); on_falling_(); break;
-      case IS_PRESSED: if (on_pressed_) DELAY_POLICY::delay(); on_pressed_(); break;
-      case IS_RELEASED: if (on_released_) DELAY_POLICY::delay(); on_released_(); break;
+      case IS_RISING: if (on_rising_) { DELAY_POLICY::delay(); return on_rising_(args...); } break;
+      case IS_FALLING: if (on_falling_) { DELAY_POLICY::delay(); return on_falling_(args...); } break;
+      case IS_PRESSED: if (on_pressed_) { DELAY_POLICY::delay(); return on_pressed_(args...); } break;
+      case IS_RELEASED: if (on_released_) { DELAY_POLICY::delay(); return on_released_(args...); } break;
     }
   }
   
