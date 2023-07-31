@@ -5,16 +5,29 @@ namespace PTS {
 
 #include <Arduino.h>
 
+// A default delay policy for software debounce delay.
+// A delay policy should have a single public static constexpr delay() method,
+// this is called in update() before the actual callbacks.
+// An empty delay adds zero overhead, simple delays get compiled away very efficiently.
+struct DelayPolicy {
+  static constexpr void delay() { };
+};
+
+template<uint32_t millis>
+struct ArduinoDelayPolicy {
+  static constexpr void delay() { ::delay(millis); }
+};
+
 // Utility class to link button state changes to callback functions
-template<typename CALLBACK_TYPE = void(*)(void)>
+template<typename CALLBACK_TYPE = void(*)(void) , typename DELAY_POLICY = DelayPolicy>
 class Button {
  public:
   // Own constants as enum to keep track of a button's state.
   enum StateChange : byte {
+      IS_RELEASED = 0b00,
       IS_RISING   = 0b01,
       IS_FALLING  = 0b10,
       IS_PRESSED  = 0b11,
-      IS_RELEASED = 0b00
   };
 
   explicit Button(const uint8_t pin) : pin_(pin), state_(LOW),
@@ -48,10 +61,10 @@ class Button {
   // executes the correct callback depending on the buttons state and/or change
   void update() const {
     switch (getStateChange()) {
-      case IS_RISING: if (on_rising_) on_rising_(); break;
-      case IS_FALLING: if (on_falling_) on_falling_(); break;
-      case IS_PRESSED: if (on_pressed_) on_pressed_(); break;
-      case IS_RELEASED: if (on_released_) on_released_(); break;
+      case IS_RISING: if (on_rising_) DELAY_POLICY::delay(); on_rising_(); break;
+      case IS_FALLING: if (on_falling_) DELAY_POLICY::delay(); on_falling_(); break;
+      case IS_PRESSED: if (on_pressed_) DELAY_POLICY::delay(); on_pressed_(); break;
+      case IS_RELEASED: if (on_released_) DELAY_POLICY::delay(); on_released_(); break;
     }
   }
   
