@@ -36,7 +36,7 @@ jobs:
     - name: Install PlatformIO Core and Build
       run: |
         pip install --upgrade platformio 
-        platformio run --environment esp32
+        platformio run
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
