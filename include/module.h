@@ -1,12 +1,10 @@
 #ifndef MODULE_HEADER_INCLUDED
 #define MODULE_HEADER_INCLUDED
 
-#include <atomic>
 #include <mutex>
 #include <Arduino.h>
 
 namespace PTS {
-
 
 // Base class for modules.
 //
@@ -27,13 +25,15 @@ template<uint32_t STACK_DEPTH = 1024, uint32_t PRIORITY = 1>
 class Module {
  public:
   enum ModuleState : uint8_t {
-    INVALID   = 0b00,
-    ACTIVE    = 0b01,
-    PASSED    = 0b10,
-    FAILED    = 0b11,
+    INVALID = 0b00,
+    ACTIVE  = 0b01,
+    PASSED  = 0b10,
+    FAILED  = 0b11,
   };
 
-  explicit Module(const char *const name) : name_(name), state_(INVALID), task_handle_(nullptr) { }
+  explicit Module(const char *const name)
+    : name_(name), state_(INVALID), state_lock_(), task_handle_(nullptr), handle_lock_()
+  { }
   virtual ~Module() = default;
 
   Module(const Module&) = delete;
@@ -42,20 +42,22 @@ class Module {
   [[nodiscard]] ModuleState getState() const { return state_; }
 
   ModuleState passState() const {
-    switch (state_.load()) {
-    case INVALID: state_.store(ACTIVE); break;
-    case ACTIVE: state_.store(PASSED); break;
+    std::lock_guard<std::mutex> lock(state_lock_);
+    switch (state_) {
+    case INVALID: state_ = ACTIVE; break;
+    case ACTIVE: state_ = PASSED; break;
     default: break;
     }
-    return state_.load();
+    return state_;
   }
 
   ModuleState failState() const {
-    switch (state_.load()) {
-    case ACTIVE: state_.store(FAILED); break;
+    std::lock_guard<std::mutex> lock(state_lock_);
+    switch (state_) {
+    case ACTIVE: state_ = FAILED; break;
     default: break;
     }
-    return state_.load();
+    return state_;
   }
 
   // to be used as setup function, since some components might need additional
@@ -101,10 +103,10 @@ class Module {
     }
   }
 
-
  private:
   const char *const name_;
-  mutable std::atomic<ModuleState> state_;
+  mutable ModuleState state_;
+  mutable std::mutex state_lock_;
   mutable TaskHandle_t task_handle_;
   mutable std::mutex handle_lock_;
 }; /* class Module */
