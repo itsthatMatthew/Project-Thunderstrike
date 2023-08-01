@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "atomic": "cpp",
-        "cstdint": "cpp"
+        "cstdint": "cpp",
+        "string": "cpp"
     }
 }
