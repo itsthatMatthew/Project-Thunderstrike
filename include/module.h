@@ -4,7 +4,6 @@
 namespace PTS {
 
 #include <Arduino.h>
-#include <string>
 
 // Base class for modules.
 //
@@ -31,7 +30,7 @@ class Module {
     FAILED    = 0b11,
   };
 
-  explicit Module(std::string &&name) : name_(name), state_(INVALID), task_handle_(nullptr) { }
+  explicit Module(const char *const name) : name_(name), state_(INVALID), task_handle_(nullptr) { }
 
   [[nodiscard]] ModuleState getState() const { return state_; }
 
@@ -60,14 +59,15 @@ class Module {
   // creates a new thread from the object running the threadFunc
   // @returns a handle to the new thread
   TaskHandle_t start(void *params = nullptr) const {
-    return task_handle_ = xTaskCreate(
+    xTaskCreate(
       threadFunc,
       name_,
       STACK_DEPTH,
       params,
       PRIORITY,
-      nullptr
+      &task_handle_
     );
+    return task_handle_;
   }
 
   void suspend() { if (task_handle_) { vTaskSuspend(task_handle_); } }
@@ -77,7 +77,7 @@ class Module {
   virtual ~Module() { } // only for heterogeneus collection
 
  private:
-  const std::string name_;
+  const char *const name_;
   mutable ModuleState state_;
   mutable TaskHandle_t task_handle_;
 }; /* class Module */
