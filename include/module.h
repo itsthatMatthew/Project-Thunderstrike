@@ -1,9 +1,12 @@
 #ifndef MODULE_HEADER_INCLUDED
 #define MODULE_HEADER_INCLUDED
 
+#include <atomic>
+#include <mutex>
+#include <Arduino.h>
+
 namespace PTS {
 
-#include <Arduino.h>
 
 // Base class for modules.
 //
@@ -31,22 +34,28 @@ class Module {
   };
 
   explicit Module(const char *const name) : name_(name), state_(INVALID), task_handle_(nullptr) { }
+  virtual ~Module() = default;
+
+  Module(const Module&) = delete;
+  Module& operator=(const Module&) = delete;
 
   [[nodiscard]] ModuleState getState() const { return state_; }
 
   ModuleState passState() const {
-    switch (state_) {
-    case INVALID: state_ = ACTIVE; break;
-    case ACTIVE: state_ = PASSED; break;
+    switch (state_.load()) {
+    case INVALID: state_.store(ACTIVE); break;
+    case ACTIVE: state_.store(PASSED); break;
+    default: break;
     }
-    return state_;
+    return state_.load();
   }
 
   ModuleState failState() const {
-    switch (state_) {
-    case ACTIVE: state_ = FAILED; break;
+    switch (state_.load()) {
+    case ACTIVE: state_.store(FAILED); break;
+    default: break;
     }
-    return state_;
+    return state_.load();
   }
 
   // to be used as setup function, since some components might need additional
@@ -59,6 +68,7 @@ class Module {
   // creates a new thread from the object running the threadFunc
   // @returns a handle to the new thread
   TaskHandle_t start(void *params = nullptr) const {
+    std::lock_guard<std::mutex> lock(handle_lock_);
     xTaskCreate(
       threadFunc,
       name_,
@@ -70,16 +80,33 @@ class Module {
     return task_handle_;
   }
 
-  void suspend() { if (task_handle_) { vTaskSuspend(task_handle_); } }
-  void resume() { if (task_handle_) { vTaskResume(task_handle_); } }
-  void destroy() const { if (task_handle_) { vTaskDelete(task_handle_); task_handle_ = nullptr; } }
+  void suspend() {
+    std::lock_guard<std::mutex> lock(handle_lock_);
+    if (task_handle_) {
+      vTaskSuspend(task_handle_);
+    }
+  }
 
-  virtual ~Module() { } // only for heterogeneus collection
+  void resume() {
+    std::lock_guard<std::mutex> lock(handle_lock_);
+    if (task_handle_) {
+      vTaskResume(task_handle_);
+    }
+  }
+
+  void destroy() const {
+    std::lock_guard<std::mutex> lock(handle_lock_);
+    if (task_handle_) {
+      vTaskDelete(task_handle_); task_handle_ = nullptr;
+    }
+  }
+
 
  private:
   const char *const name_;
-  mutable ModuleState state_;
+  mutable std::atomic<ModuleState> state_;
   mutable TaskHandle_t task_handle_;
+  mutable std::mutex handle_lock_;
 }; /* class Module */
 
 }; /* namespace PTS */
