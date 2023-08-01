@@ -30,7 +30,7 @@ class Button {
   using CALLBACK_TYPE = RET(*)(ARGS...);
 
   // Own constants as enum to keep track of a button's state.
-  enum StateChange : byte {
+  enum StateChange : uint8_t {
       IS_RELEASED = 0b00,
       IS_RISING   = 0b01,
       IS_FALLING  = 0b10,
@@ -51,10 +51,10 @@ class Button {
   }
   
   // reads the new state, stores and returns it
-  byte readNewState() const { return state_ = digitalRead(pin_); }
+  uint8_t readNewState() const { return state_ = digitalRead(pin_); }
 
   // returns the current state (HIGH or LOW)
-  [[nodiscard]] byte currentState() const { return state_; }
+  [[nodiscard]] uint8_t currentState() const { return state_; }
 
   // determines what state change has happened to the button,
   // can detect rising and falling as well as simple high and low states (press and release)
@@ -73,6 +73,7 @@ class Button {
       case IS_PRESSED: if (on_pressed_) { DELAY_POLICY::delay(); return on_pressed_(args...); } break;
       case IS_RELEASED: if (on_released_) { DELAY_POLICY::delay(); return on_released_(args...); } break;
     }
+    // TODO: in case no callback is set up yet, and control falls through, something should be done here for non-void return types (complex structures might not have default initializer)
   }
   
   void onRising(CALLBACK_TYPE callback) const { on_rising_ = callback; }
@@ -83,7 +84,7 @@ class Button {
  private:
   // inner vars:
   const uint8_t pin_; // the connected gpio pin
-  mutable byte state_;  // the buttons state (since it's last update, used to calculate state changes)
+  mutable uint8_t state_;  // the buttons state (since it's last update, used to calculate state changes)
   // callbacks:
   mutable CALLBACK_TYPE on_rising_;
   mutable CALLBACK_TYPE on_falling_;
