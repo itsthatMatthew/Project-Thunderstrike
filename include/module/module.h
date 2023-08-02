@@ -21,7 +21,7 @@ namespace PTS {
 //           v    v
 //      FAILED    SOLVED
 
-template<uint32_t STACK_DEPTH = 1024, uint32_t PRIORITY = 1>
+template<uint32_t STACK_DEPTH = 1024, uint32_t PRIORITY = tskIDLE_PRIORITY>
 class Module {
  public:
   enum ModuleState : uint8_t {
@@ -40,6 +40,7 @@ class Module {
   Module& operator=(const Module&) = delete;
 
   [[nodiscard]] ModuleState getState() const { return state_; }
+  [[nodiscard]] const char *const getName() const { return name_; }
 
   ModuleState passState() const {
     std::lock_guard<std::mutex> lock(state_lock_);
@@ -67,29 +68,27 @@ class Module {
   // thread worker function that gets executed as start() is called
   virtual void threadFunc() const { }
 
-  // creates a new thread from the object running the threadFunc
-  // @returns a handle to the new thread
-  TaskHandle_t start() const {
+  // creates a new thread from the object running threadFunc()
+  void start() const {
     std::lock_guard<std::mutex> lock(handle_lock_);
     xTaskCreate(
-      [](void *obj) constexpr { static_cast<decltype(this)>(obj)->threadFunc(); }, // wrapper lambda
+      [](void *obj) constexpr { for(;;) static_cast<decltype(this)>(obj)->threadFunc(); }, // wrapper lambda
       name_,
       STACK_DEPTH,
       const_cast<Module*>(this), // removing const qualifyer as the API mandates void*
       PRIORITY,
       &task_handle_
     );
-    return task_handle_;
   }
 
-  void suspend() {
+  void suspend() const {
     std::lock_guard<std::mutex> lock(handle_lock_);
     if (task_handle_) {
       vTaskSuspend(task_handle_);
     }
   }
 
-  void resume() {
+  void resume() const {
     std::lock_guard<std::mutex> lock(handle_lock_);
     if (task_handle_) {
       vTaskResume(task_handle_);
