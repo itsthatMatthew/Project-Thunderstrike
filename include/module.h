@@ -65,17 +65,17 @@ class Module {
   virtual void begin() const { }
 
   // thread worker function that gets executed as start() is called
-  static constexpr void threadFunc(void *params) { }
+  virtual void threadFunc() const { }
 
   // creates a new thread from the object running the threadFunc
   // @returns a handle to the new thread
-  TaskHandle_t start(void *params = nullptr) const {
+  TaskHandle_t start() const {
     std::lock_guard<std::mutex> lock(handle_lock_);
     xTaskCreate(
-      threadFunc,
+      [](void *obj) constexpr { static_cast<decltype(this)>(obj)->threadFunc(); }, // wrapper lambda
       name_,
       STACK_DEPTH,
-      params,
+      const_cast<Module*>(this), // removing const qualifyer as the API mandates void*
       PRIORITY,
       &task_handle_
     );
