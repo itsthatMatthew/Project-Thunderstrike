@@ -21,7 +21,7 @@ namespace PTS {
 //           v    v
 //      FAILED    SOLVED
 
-template<uint32_t STACK_DEPTH = 1024, uint32_t PRIORITY = 1>
+template<uint32_t STACK_DEPTH = 1024, uint32_t PRIORITY = tskIDLE_PRIORITY>
 class Module {
  public:
   enum ModuleState : uint8_t {
@@ -68,12 +68,11 @@ class Module {
   // thread worker function that gets executed as start() is called
   virtual void threadFunc() const { }
 
-  // creates a new thread from the object running the threadFunc
-  // @returns a handle to the new thread
+  // creates a new thread from the object running threadFunc()
   void start() const {
     std::lock_guard<std::mutex> lock(handle_lock_);
     xTaskCreate(
-      [](void *obj) constexpr { static_cast<decltype(this)>(obj)->threadFunc(); }, // wrapper lambda
+      [](void *obj) constexpr { for(;;) static_cast<decltype(this)>(obj)->threadFunc(); }, // wrapper lambda
       name_,
       STACK_DEPTH,
       const_cast<Module*>(this), // removing const qualifyer as the API mandates void*
