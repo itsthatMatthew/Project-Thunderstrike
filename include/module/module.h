@@ -40,6 +40,7 @@ class Module {
   Module& operator=(const Module&) = delete;
 
   [[nodiscard]] ModuleState getState() const { return state_; }
+  [[nodiscard]] const char *const getName() const { return name_; }
 
   ModuleState passState() const {
     std::lock_guard<std::mutex> lock(state_lock_);
@@ -69,7 +70,7 @@ class Module {
 
   // creates a new thread from the object running the threadFunc
   // @returns a handle to the new thread
-  TaskHandle_t start() const {
+  void start() const {
     std::lock_guard<std::mutex> lock(handle_lock_);
     xTaskCreate(
       [](void *obj) constexpr { static_cast<decltype(this)>(obj)->threadFunc(); }, // wrapper lambda
@@ -79,17 +80,16 @@ class Module {
       PRIORITY,
       &task_handle_
     );
-    return task_handle_;
   }
 
-  void suspend() {
+  void suspend() const {
     std::lock_guard<std::mutex> lock(handle_lock_);
     if (task_handle_) {
       vTaskSuspend(task_handle_);
     }
   }
 
-  void resume() {
+  void resume() const {
     std::lock_guard<std::mutex> lock(handle_lock_);
     if (task_handle_) {
       vTaskResume(task_handle_);
