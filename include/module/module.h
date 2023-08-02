@@ -71,14 +71,16 @@ class Module {
   // creates a new thread from the object running threadFunc()
   void start() const {
     std::lock_guard<std::mutex> lock(handle_lock_);
-    xTaskCreate(
-      [](void *obj) constexpr { for(;;) static_cast<decltype(this)>(obj)->threadFunc(); }, // wrapper lambda
-      name_,
-      STACK_DEPTH,
-      const_cast<Module*>(this), // removing const qualifyer as the API mandates void*
-      PRIORITY,
-      &task_handle_
-    );
+    if (!task_handle_) {
+      xTaskCreate(
+        [](void *obj) constexpr { for(;;) static_cast<decltype(this)>(obj)->threadFunc(); }, // wrapper lambda
+        name_,
+        STACK_DEPTH,
+        const_cast<Module*>(this), // removing const qualifyer as the API mandates void*
+        PRIORITY,
+        &task_handle_
+      );
+    }
   }
 
   void suspend() const {
@@ -98,7 +100,8 @@ class Module {
   void destroy() const {
     std::lock_guard<std::mutex> lock(handle_lock_);
     if (task_handle_) {
-      vTaskDelete(task_handle_); task_handle_ = nullptr;
+      vTaskDelete(task_handle_);
+      task_handle_ = nullptr;
     }
   }
 
