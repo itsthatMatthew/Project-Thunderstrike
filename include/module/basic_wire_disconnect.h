@@ -22,6 +22,7 @@ class WireDisconnect : public Module<> {
     wire_2.begin();
     wire_3.begin();
     status.begin();
+    status.yellow();
 
     // what to do, when wire_1 is disconnected (state is a falling edge)
     wire_1.onFalling([](const WireDisconnect* obj_ptr) constexpr {
