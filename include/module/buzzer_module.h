@@ -16,9 +16,9 @@ class BuzzerModule : public Module<> {
 
   void threadFunc() const override {
     digitalWrite(pin_, HIGH);
-    delay(BUZZER_TONE);
+    delayMicroseconds(1000000 / BUZZER_TONE);
     digitalWrite(pin_, LOW);
-    delay(BUZZER_TONE);
+    delayMicroseconds(1000000 / BUZZER_TONE);
   }
  private:
   const uint8_t pin_;
