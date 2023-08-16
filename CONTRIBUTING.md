@@ -37,7 +37,7 @@ Reading existing code might be helpful to get the general vibe.
 Adhering to these practices will make the code immediately easier to read for everyone.
 
 - Files and variable names should be written in snake case (`snake_case`).
-- Defines and enum values should be written in macro case (`MACRO_CASE`).
+- Defines, template variables and enum values should be written in macro case (`MACRO_CASE`).
 - Class and type names should be written in uppre camel case (`UppreCamelCase`).
 - Functions should be written in lower camel case (`lowerCamelCase`).
 - You should **NEVER** start any name with an underscore (`_...`).
@@ -55,6 +55,14 @@ Pull requests let you improve the codebase in the most hands-on way possible.
 
 - After forking the repository, create a new working branch for your needs.
 - You should add your fixes and improvements in smaller chunks: each commit should tackle a single and well-defined problem.
-- Your pull requests should have a straight to point title and through description. If you are solving an issue, link it to the pull request.
+- Your pull requests should have a straight to the point title and through description. If you are solving an issue, link it to the pull request.
 
 If everything is fine, your pull request should be merged.
+
+---
+
+<footer style="text-align: center;">
+The provided templates should give you a clear direction of the expected issue and pull request formatting.
+
+If you have further questions, feel free to contact us.
+</footer>
