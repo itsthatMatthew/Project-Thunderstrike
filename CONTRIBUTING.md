@@ -26,11 +26,22 @@ For a more hands on experience, you can find issues you want to solve. If you've
 
 Reading existing code might be helpful to get the general vibe.
 
-- When contributing, you should always follow the [LLVM Coding Standards](https://llvm.org/docs/CodingStandards.html).
+- When contributing, you should try to always follow the [LLVM Coding Standards](https://llvm.org/docs/CodingStandards.html).
 - If some fuzzy edge case is not well covered, be prudent in your writing: try to be as understandable as possible.
 - The project uses the C++17 standard. Utilize language features as best as you can.
 - Indentations should be done by using 2 spaces.
-- Namings should be descriptive and *snake_case* everywhere.
+- Operators (among other things) should be separated by spaces for clarity.
+
+### Naming conventions
+
+Adhering to these practices will make the code immediately easier to read for everyone.
+
+- Files and variable names should be written in snake case (`snake_case`).
+- Defines and enum values should be written in macro case (`MACRO_CASE`).
+- Class and type names should be written in uppre camel case (`UppreCamelCase`).
+- Functions should be written in lower camel case (`lowerCamelCase`).
+- You should **NEVER** start any name with an underscore (`_...`).
+- Use prefixes for class variables, such as `m_` (member), `s_` (static), `c_` (const).
 
 ## Testing
 
