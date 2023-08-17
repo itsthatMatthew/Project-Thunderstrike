@@ -34,6 +34,7 @@ Reading existing code might be helpful to get the general vibe.
 - Code blocks should be wrapped in Allman style - each brace in a new line.
 - **ONLY** write single line code if it has a well defined and clear responsibility.
 - Operators and variables (among other things) should be separated by spaces for clarity.
+- Only ever use `using namespace ...` locally, but avoid if possible.
 
 ### Naming conventions
 
