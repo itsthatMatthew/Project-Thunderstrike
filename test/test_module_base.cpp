@@ -1,21 +1,15 @@
 #include <Arduino.h>
 #include <unity.h>
-#include "module/module.h"
+#include "module.h"
 
-class EmptyModule : public PTS::Module<> {
- public:
-  EmptyModule(const char const *name) : Module(name) { }
-  void begin() const override { }
-  void threadFunc() const override { }
-};
+void setUp() {    
+}
 
-void setUp() { }
+void tearDown() {
+}
 
-void tearDown() { }
-
-void base_class_pass_state_transitions()
-{
-    EmptyModule module("base_module");
+void base_class_pass_state_transitions() {
+    PTS::Module module("base_module");
 
     TEST_ASSERT_EQUAL(PTS::Module<>::INVALID, module.getState());
 
@@ -32,9 +26,8 @@ void base_class_pass_state_transitions()
     TEST_ASSERT_EQUAL(PTS::Module<>::PASSED, module.getState());
 }
 
-void base_class_fail_state_transitions()
-{
-    EmptyModule module("base_module");
+void base_class_fail_state_transitions() {
+    PTS::Module module("base_module");
 
     TEST_ASSERT_EQUAL(PTS::Module<>::INVALID, module.getState());
 
@@ -54,8 +47,7 @@ void base_class_fail_state_transitions()
     TEST_ASSERT_EQUAL(PTS::Module<>::FAILED, module.getState());
 }
 
-void setup()
-{
+void setup() {
     UNITY_BEGIN();
 
     RUN_TEST(base_class_pass_state_transitions);
