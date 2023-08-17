@@ -30,7 +30,9 @@ Reading existing code might be helpful to get the general vibe.
 - If some fuzzy edge case is not well covered, be prudent in your writing: try to be as understandable as possible.
 - The project uses the C++17 standard. Utilize language features as best as you can.
 - Indentations should be done by using 2 spaces.
-- Operators (among other things) should be separated by spaces for clarity.
+- Code with should be no more than 80 characters.
+- Code blocks should be wrapped in Allman style - each brace in a new line.
+- Operators and variables (among other things) should be separated by spaces for clarity.
 
 ### Naming conventions
 
