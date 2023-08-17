@@ -32,6 +32,7 @@ Reading existing code might be helpful to get the general vibe.
 - Indentations should be done by using 2 spaces.
 - Code with should be no more than 80 characters.
 - Code blocks should be wrapped in Allman style - each brace in a new line.
+- **ONLY** write single line code if it has a well defined and clear responsibility.
 - Operators and variables (among other things) should be separated by spaces for clarity.
 
 ### Naming conventions
