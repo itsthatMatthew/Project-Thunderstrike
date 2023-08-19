@@ -1,89 +1,124 @@
-#ifndef RGBLED_HEADER_INCLUDED
-#define RGBLED_HEADER_INCLUDED
+//===-- utils/rgbled.h - RGBLED utility class definition ------------------===//
+//
+// Project-Thunderstrike (PTS) collection header file.
+// Find more information at:
+// https://github.com/itsthatMatthew/Project-Thunderstrike
+//
+//===----------------------------------------------------------------------===//
+///
+/// \file This file contains the declarations of the RGBLED class, which is a
+/// utility class for working with 3 + 1 legged RGB LEDs, where the 3 legs
+/// represent red, green and blue.
+///
+/// Load balancing is your responsibility!
+/// R : G : B resistors *should* be around 18 : 4 : 3
+///
+//===----------------------------------------------------------------------===//
 
-namespace PTS {
+#ifndef UTILS_RGBLED_H
+#define UTILS_RGBLED_H
 
 #include <Arduino.h>
 
-// Utility class for working with 3 + 1 leg RGB LEDs,
-// where the 3 legs represent red, green and blue.
-// CAUTION! Load balancing is your responsibility!
-// R : G : B resistors *should* be around 18 : 4 : 3
-class RGBLED {
+namespace PTS
+{
+
+/// RGBLED class
+class RGBLED
+{
+//===-- Instantiation specific functions ----------------------------------===//
  public:
-  explicit RGBLED(const uint8_t red_pin, const uint8_t green_pin, const uint8_t blue_pin)
-    : r_(red_pin), g_(green_pin), b_(blue_pin)
+  explicit RGBLED(
+    const uint8_t red_pin,
+    const uint8_t green_pin,
+    const uint8_t blue_pin
+  )
+  : c_red_pin(red_pin),
+    c_green_pin(green_pin),
+    c_blue_pin(blue_pin)
   { }
 
-  // sets up the communication pins
-  void begin() const {
-    pinMode(r_, OUTPUT);
-    pinMode(g_, OUTPUT);
-    pinMode(b_, OUTPUT);
+  /// Sets up the communication pins.
+  void begin() const
+  {
+    pinMode(c_red_pin, OUTPUT);
+    pinMode(c_green_pin, OUTPUT);
+    pinMode(c_blue_pin, OUTPUT);
   }
 
-  // sets the color red
-  void red() const {
-    digitalWrite(r_, HIGH);
-    digitalWrite(g_, LOW);
-    digitalWrite(b_, LOW);
+//===-- Modifier functions ------------------------------------------------===//
+
+  /// Sets the color red.
+  void red() const
+  {
+    digitalWrite(c_red_pin, HIGH);
+    digitalWrite(c_green_pin, LOW);
+    digitalWrite(c_blue_pin, LOW);
   }
 
-  // sets the color green
-  void green() const {
-    digitalWrite(r_, LOW);
-    digitalWrite(g_, HIGH);
-    digitalWrite(b_, LOW);
+  /// Sets the color green.
+  void green() const
+  {
+    digitalWrite(c_red_pin, LOW);
+    digitalWrite(c_green_pin, HIGH);
+    digitalWrite(c_blue_pin, LOW);
   }
 
-  // sets the color blue
-  void blue() const {
-    digitalWrite(r_, LOW);
-    digitalWrite(g_, LOW);
-    digitalWrite(b_, HIGH);
+  /// Sets the color blue.
+  void blue() const
+  {
+    digitalWrite(c_red_pin, LOW);
+    digitalWrite(c_green_pin, LOW);
+    digitalWrite(c_blue_pin, HIGH);
   }
 
-  // sets the color cyan
-  void cyan() const {
-    digitalWrite(r_, LOW);
-    digitalWrite(g_, HIGH);
-    digitalWrite(b_, HIGH);
+  /// Sets the color cyan.
+  void cyan() const
+  {
+    digitalWrite(c_red_pin, LOW);
+    digitalWrite(c_green_pin, HIGH);
+    digitalWrite(c_blue_pin, HIGH);
   }
 
-  // sets the color yellow
-  void yellow() const {
-    digitalWrite(r_, HIGH);
-    digitalWrite(g_, HIGH);
-    digitalWrite(b_, LOW);
+  /// Sets the color yellow.
+  void yellow() const
+  {
+    digitalWrite(c_red_pin, HIGH);
+    digitalWrite(c_green_pin, HIGH);
+    digitalWrite(c_blue_pin, LOW);
   }
 
-  // sets the color magenta
-  void magenta() const {
-    digitalWrite(r_, HIGH);
-    digitalWrite(g_, LOW);
-    digitalWrite(b_, HIGH);
+  /// Sets the color magenta.
+  void magenta() const
+  {
+    digitalWrite(c_red_pin, HIGH);
+    digitalWrite(c_green_pin, LOW);
+    digitalWrite(c_blue_pin, HIGH);
   }
 
-  // sets the color white by turning all LEDs on
-  void white() const {
-    digitalWrite(r_, HIGH);
-    digitalWrite(g_, HIGH);
-    digitalWrite(b_, HIGH);
+  /// Sets the color white by turning all LEDs on.
+  void white() const
+  {
+    digitalWrite(c_red_pin, HIGH);
+    digitalWrite(c_green_pin, HIGH);
+    digitalWrite(c_blue_pin, HIGH);
   }
 
-  // turns the LED off
-  void off() const {
-    digitalWrite(r_, LOW);
-    digitalWrite(g_, LOW);
-    digitalWrite(b_, LOW);
+  /// Turns the LED off.
+  void off() const
+  {
+    digitalWrite(c_red_pin, LOW);
+    digitalWrite(c_green_pin, LOW);
+    digitalWrite(c_blue_pin, LOW);
   }
 
+//===-- Member variables --------------------------------------------------===//
  private:
-  const uint8_t r_;
-  const uint8_t g_;
-  const uint8_t b_;
-}; /* class RGBLED */
+  const uint8_t c_red_pin;
+  const uint8_t c_green_pin;
+  const uint8_t c_blue_pin;
+}; // class RGBLED
 
-}; /* namespace PTS */
+} // namespace PTS
 
-#endif /* RGBLED_HEADER_INCLUDED */
+#endif // UTILS_RGBLED_H
