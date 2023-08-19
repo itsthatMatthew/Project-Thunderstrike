@@ -1,97 +1,157 @@
-#ifndef BUTTON_HEADER_INCLUDED
-#define BUTTON_HEADER_INCLUDED
+//===-- utils/button.h - Button utility class definition ------------------===//
+//
+// Project-Thunderstrike (PTS) collection header file.
+// Find more information at:
+// https://github.com/itsthatMatthew/Project-Thunderstrike
+//
+//===----------------------------------------------------------------------===//
+///
+/// \file This file contains the declarations of the Button class, which is a
+/// utility class to link button state changes to callback functions
+///
+/// Callbacks are function pointers with template return and argument types.
+/// Only one callback can be set to each state change.
+///
+//===----------------------------------------------------------------------===//
 
-namespace PTS {
+#ifndef UTILS_BUTTON_H
+#define UTILS_BUTTON_H
 
 #include <Arduino.h>
 
-// A default delay policy for software debounce delay.
-// A delay policy should have a single public static constexpr delay() method,
-// this is called in update() before the actual callbacks.
-// An empty delay adds zero overhead, simple delays get compiled away very efficiently.
-struct NoDelayPolicy {
-  static constexpr void delay() { };
-};
+namespace PTS
+{
 
-// Simple delay policy with the use of the Arduino framework's delay() method.
-// For the best optimization use templates and constexpr wherever you can.
-template<uint32_t millis>
-struct ArduinoDelayPolicy {
-  static constexpr void delay() { ::delay(millis); }
-};
-
-// Utility class to link button state changes to callback functions
+/// Button class
+/// \tparam DELAY_MILLIS the desired software delay time for debouncing (in ms).
+/// \tparam RETURN_TYPE the return type of the callbacks.
+/// \tparam ARG_TYPES (variadic) the argument types of the callbacks.
 template<
-  typename DELAY_POLICY = NoDelayPolicy, // for software debounce delay
-  typename RET = void, typename... ARGS  // for custom callback parameters
+  uint32_t DELAY_MILLIS = 100,
+  typename RETURN_TYPE = void, typename... ARG_TYPES
 >
-class Button {
+class Button
+{
  public:
-  using CALLBACK_TYPE = RET(*)(ARGS...);
+  /// Used to easily maintain the callback type within the class.
+  using CALLBACK_TYPE = RETURN_TYPE(*)(ARG_TYPES...);
 
-  // Own constants as enum to keep track of a button's state.
-  enum StateChange : uint8_t {
+  /// Enum type for constants to keep track of a button's state (change).
+  enum StateChange : uint8_t
+  {
       IS_RELEASED = 0b00,
       IS_RISING   = 0b01,
       IS_FALLING  = 0b10,
       IS_PRESSED  = 0b11,
   };
 
-  explicit Button(const uint8_t pin) : pin_(pin), state_(LOW),
-    on_rising_(nullptr),
-    on_falling_(nullptr),
-    on_pressed_(nullptr),
-    on_released_(nullptr)
+//===-- Instantiation specific functions ----------------------------------===//
+
+  explicit Button(const uint8_t pin)
+  : c_pin(pin),
+    m_state(LOW),
+    m_delay_until(0),
+    m_on_rising(nullptr),
+    m_on_falling(nullptr),
+    m_on_pressed(nullptr),
+    m_on_released(nullptr)
    { }
   
-  // sets up the communication pin and reads a beginning state
-  void begin() const {
-    pinMode(pin_, INPUT);
+  /// Sets up the communication pin and reads the beginning state.
+  void begin() const
+  {
+    pinMode(c_pin, INPUT);
     readNewState();
   }
   
-  // reads the new state, stores and returns it
-  uint8_t readNewState() const { return state_ = digitalRead(pin_); }
+//===-- State change and callback specific functions ----------------------===//
 
-  // returns the current state (HIGH or LOW)
-  [[nodiscard]] uint8_t currentState() const { return state_; }
+  /// Reads the new state and stores it.
+  /// If a delay is set, it discards new results until the set time.
+  /// \return the read state.
+  uint8_t readNewState() const
+  {
+    if (::millis() >= m_delay_until)
+      m_state = digitalRead(c_pin);
 
-  // determines what state change has happened to the button,
-  // can detect rising and falling as well as simple high and low states (press and release)
-  StateChange getStateChange() const {
+    return m_state;
+  }
+
+  /// Returns the current state.
+  /// \return the current state (HIGH or LOW).
+  [[nodiscard]] uint8_t currentState() const { return m_state; }
+
+  /// Determines what state change has happened to the button, and can detect
+  /// rising and falling as well as pressed and released states.
+  /// \return the determined state change.
+  [[nodiscard]] StateChange getStateChange() const
+  {
     StateChange change = static_cast<StateChange>(0b00);
-    if (currentState() == HIGH) change = static_cast<StateChange>(change | 0b10); // old state
-    if (readNewState() == HIGH) change = static_cast<StateChange>(change | 0b01); // new state
+
+    if (currentState() == HIGH) // old state
+      change = static_cast<StateChange>(change | 0b10);
+
+    if (readNewState() == HIGH) // new state
+      change = static_cast<StateChange>(change | 0b01);
+
+    if (change == RISING || change == FALLING) // only if changed
+      m_delay_until = millis() + DELAY_MILLIS;
+
     return change;
   }
   
-  // executes the correct callback depending on the buttons state and/or change
-  auto update(ARGS... args) const -> RET {
-    switch (getStateChange()) {
-      case IS_RISING: if (on_rising_) { DELAY_POLICY::delay(); return on_rising_(args...); } break;
-      case IS_FALLING: if (on_falling_) { DELAY_POLICY::delay(); return on_falling_(args...); } break;
-      case IS_PRESSED: if (on_pressed_) { DELAY_POLICY::delay(); return on_pressed_(args...); } break;
-      case IS_RELEASED: if (on_released_) { DELAY_POLICY::delay(); return on_released_(args...); } break;
+  /// Executes a callback depending on the buttons state change.
+  /// \return the callback's result in the set return type, nothing if void.
+  auto update(ARG_TYPES... args) const -> RETURN_TYPE
+  {
+    switch (getStateChange())
+    {
+      case IS_RISING:   if (m_on_rising)   return m_on_rising(args...);   break;
+      case IS_FALLING:  if (m_on_falling)  return m_on_falling(args...);  break;
+      case IS_PRESSED:  if (m_on_pressed)  return m_on_pressed(args...);  break;
+      case IS_RELEASED: if (m_on_released) return m_on_released(args...); break;
     }
-    // TODO: in case no callback is set up yet, and control falls through, something should be done here for non-void return types (complex structures might not have default initializer)
+
+    // FIXME: in case no callback is set up yet, and control falls through,
+    // *something* should be done here for non-void return types (complex
+    // structures might not have default initializer)
   }
   
-  void onRising(CALLBACK_TYPE callback) const { on_rising_ = callback; }
-  void onFalling(CALLBACK_TYPE callback) const { on_falling_ = callback; }
-  void onPressed(CALLBACK_TYPE callback) const { on_pressed_ = callback; }
-  void onReleased(CALLBACK_TYPE callback) const { on_released_ = callback; }
+  /// Sets the callback called on rising state change.
+  /// \param callback the callback to be set.
+  void onRising(CALLBACK_TYPE callback) const { m_on_rising = callback; }
+
+  /// Sets the callback called on falling state change.
+  /// \param callback the callback to be set.
+  void onFalling(CALLBACK_TYPE callback) const { m_on_falling = callback; }
+
+  /// Sets the callback called on pressed state.
+  /// \param callback the callback to be set.
+  void onPressed(CALLBACK_TYPE callback) const { m_on_pressed = callback; }
+
+  /// Sets the callback called on released state.
+  /// \param callback the callback to be set.
+  void onReleased(CALLBACK_TYPE callback) const { m_on_released = callback; }
   
+//===-- Member variables --------------------------------------------------===//
+
  private:
-  // inner vars:
-  const uint8_t pin_; // the connected gpio pin
-  mutable uint8_t state_;  // the buttons state (since it's last update, used to calculate state changes)
-  // callbacks:
-  mutable CALLBACK_TYPE on_rising_;
-  mutable CALLBACK_TYPE on_falling_;
-  mutable CALLBACK_TYPE on_pressed_;
-  mutable CALLBACK_TYPE on_released_;
-}; /* class Button */
+  /// The connected gpio pin.
+  const uint8_t c_pin;
+  /// The buttons state.
+  mutable uint8_t m_state;
+  /// The time until the software delay should last.
+  mutable unsigned long m_delay_until;
 
-}; /* namespace PTS */
+//===-- Callbacks ---------------------------------------------------------===//
 
-#endif /* BUTTON_HEADER_INCLUDED */
+ private:
+  mutable CALLBACK_TYPE m_on_rising;
+  mutable CALLBACK_TYPE m_on_falling;
+  mutable CALLBACK_TYPE m_on_pressed;
+  mutable CALLBACK_TYPE m_on_released;
+}; // class Button
+
+} // namespace PTS
+
+#endif // UTILS_BUTTON_H
