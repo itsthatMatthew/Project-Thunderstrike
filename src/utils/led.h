@@ -1,30 +1,47 @@
-#ifndef LED_HEADER_INCLUDED
-#define LED_HEADER_INCLUDED
+//===-- utils/led.h - LED utility class definition ------------------------===//
+//
+// Project-Thunderstrike (PTS) collection header file.
+// Find more information at:
+// https://github.com/itsthatMatthew/Project-Thunderstrike
+//
+//===----------------------------------------------------------------------===//
+///
+/// \file This file contains the declarations of the LED class, which is a
+/// utility class for simlpe 2 leg single color LEDs.
+///
+//===----------------------------------------------------------------------===//
 
-namespace PTS {
+#ifndef UTILS_LED_H
+#define UTILS_LED_H
 
 #include <Arduino.h>
 
-// Utility class for 2 leg single color LEDs
-class LED {
+namespace PTS
+{
+
+/// LED class 
+class LED
+{
+//===-- Instantiation specific functions ----------------------------------===//
  public:
-  explicit LED(const uint8_t pin) : pin_(pin) { }
+  explicit LED(const uint8_t pin) : c_pin(pin) { }
 
-  // sets up the communication pin
-  void begin() const {
-  	pinMode(pin_, OUTPUT);
-  }
+  /// Sets up the communication pin.
+  void begin() const { pinMode(c_pin, OUTPUT); }
 
-  // turns the LED on
-  void on() const { digitalWrite(pin_, HIGH); }
+//===-- Modifier functions ------------------------------------------------===//
 
-  // turns the LED off
-  void off() const { digitalWrite(pin_, LOW); }
+  /// Turns the LED on.
+  void on() const { digitalWrite(c_pin, HIGH); }
 
+  /// Turns the LED off.
+  void off() const { digitalWrite(c_pin, LOW); }
+
+//===-- Member variables --------------------------------------------------===//
  private:
-  const uint8_t pin_;
-}; /* class LED */
+  const uint8_t c_pin;
+}; // class LED
 
-}; /* namespace PTS */
+} // namespace PTS
 
-#endif /* LED_HEADER_INCLUDED */
+#endif // UTILS_LED_H
