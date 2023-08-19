@@ -21,16 +21,19 @@
 #include <mutex>
 #include <Arduino.h>
 
-namespace PTS {
+namespace PTS
+{
 
 /// Module base class.
 /// \tparam STACK_DEPTH the desired stack depth.
 /// \tparam PRIORITY the desired task priority.
 template<uint32_t STACK_DEPTH = 1024, uint32_t PRIORITY = tskIDLE_PRIORITY>
-class Module {
+class Module
+{
  public:
   /// Enumerated values storing the module's possible state.
-  enum ModuleState : uint8_t {
+  enum ModuleState : uint8_t
+  {
     INVALID = 0b00,
     ACTIVE  = 0b01,
     PASSED  = 0b10,
@@ -64,7 +67,7 @@ class Module {
   [[nodiscard]] ModuleState getState() const { return m_state; }
 
   /// \return the module's name.
-  [[nodiscard]] const char *const getName() const { return c_name; }
+  [[nodiscard]] char *const getName() const { return c_name; }
 
   /// Resets the module's state to INVALID.
   void invalidateState() const { m_state = INVALID; }
@@ -168,6 +171,6 @@ class Module {
   mutable std::mutex m_handle_lock;
 }; // class Module
 
-}; // namespace PTS
+} // namespace PTS
 
 #endif // MODULE_MODULE_H
