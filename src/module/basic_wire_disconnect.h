@@ -85,9 +85,9 @@ class WireDisconnect : public Module<> {
   }
 
  private:
-  const Button<ArduinoDelayPolicy<100>, void, const WireDisconnect*> wire_1; 
-  const Button<ArduinoDelayPolicy<100>, void, const WireDisconnect*> wire_2; 
-  const Button<ArduinoDelayPolicy<100>, void, const WireDisconnect*> wire_3; 
+  const Button<100, void, const WireDisconnect*> wire_1; 
+  const Button<100, void, const WireDisconnect*> wire_2; 
+  const Button<100, void, const WireDisconnect*> wire_3; 
   const RGBLED status;
   mutable size_t accumulator = 0;
   mutable size_t disconnect = 0;
