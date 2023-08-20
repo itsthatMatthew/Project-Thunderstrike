@@ -7,14 +7,13 @@
 
 Demo bomb-defusal game project mostly for airsoft games and other sorts of activity, based on an ESP32 micro-controller. Inspired by Keep Talking And Nobody Explodes.
 
-The software implementation is constantly subject to change, hardware implementation's details and graphs may be presented in the future.
-
 The goal is a modular software and hardware design, where new games and tasks can be easily added to the "main board".
 
 ## Getting involved
 
 - If you want to contribute to the project, check out our [Project Contribution Guidelines](.github/CONTRIBUTING.md)!
-- If you want to report bugs or request features, or even tackle existing ones, check out our [Issues](https://github.com/itsthatMatthew/Project-Thunderstrike/issues)! 
+- If you want to report bugs, tackle existing ones, or request features, check out the project's [Issues](https://github.com/itsthatMatthew/Project-Thunderstrike/issues) page!
+- If you just want to chat with others, discuss and brainstorm ideas, check out the project's [Discussions](https://github.com/itsthatMatthew/Project-Thunderstrike/discussions) page!
 
 ## Software
 
