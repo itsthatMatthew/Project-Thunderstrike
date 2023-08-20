@@ -1,98 +1,136 @@
-// This file is mainly aimed at being an example at how to write your own modules
-#ifndef BASIC_WIRE_DISCONNECT_HEADER_INCLUDED
-#define BASIC_WIRE_DISCONNECT_HEADER_INCLUDED
+//===-- module/basic_wire_disconnect.h - WireDisconnect class definition --===//
+//
+// Project-Thunderstrike (PTS) collection header file.
+// Find more information at:
+// https://github.com/itsthatMatthew/Project-Thunderstrike
+//
+//===----------------------------------------------------------------------===//
+///
+/// \file This file contains the declarations of the WireDisconnect class, which
+/// is a module for a simple wire-disconnect game.
+///
+/// This file is also intended to be an example of how to write your own modules
+///
+/// To complete the module, you must disconnect the wires in the order passed to
+/// the module's constructor. If all 3 wires have been disconnected, the module
+/// is passed. If a wire has been disconnected in the wrong order, the module is
+/// failed.
+///
+//===----------------------------------------------------------------------===//
+
+#ifndef MODULE_BASIC_WIRE_DISCONNECT_H
+#define MODULE_BASIC_WIRE_DISCONNECT_H
 
 #include "module.h"
-#include "./utils/button.h"
-#include "./utils/rgbled.h"
+#include "utils/button.h"
+#include "utils/rgbled.h"
 
-namespace PTS {
+namespace PTS
+{
 
-// The derived module class, we don't want to specify any of the template arguments
-class WireDisconnect : public Module<> {
+/// WireDisconnect class
+class WireDisconnect : public Module<>
+{
+//===-- Instantiation specific functions ----------------------------------===//
+
  public:
-  // base constructor and member variables init (the status led was hard coded)
-  explicit WireDisconnect(const char *const name, uint8_t wire_1, uint8_t wire_2, uint8_t wire_3)
-    : Module(name), wire_1(wire_1), wire_2(wire_2), wire_3(wire_3), status(GPIO_NUM_21, GPIO_NUM_22, GPIO_NUM_23)
+  explicit WireDisconnect(const char *const name,
+                          uint8_t wire_1, uint8_t wire_2, uint8_t wire_3,
+                          const RGBLED &led_ref)
+  : Module(name),
+    c_wire_1(wire_1),
+    c_wire_2(wire_2),
+    c_wire_3(wire_3),
+    c_status_rgbled(led_ref)
     { }
   
-  // begin function (override)
-  void begin() const override {
-    wire_1.begin();
-    wire_2.begin();
-    wire_3.begin();
-    status.begin();
-    status.yellow();
+  /// Begin members and set callbacks.
+  void begin() const override
+  {
+    c_wire_1.begin();
+    c_wire_2.begin();
+    c_wire_3.begin();
+    c_status_rgbled.begin();
 
-    // what to do, when wire_1 is disconnected (state is a falling edge)
-    wire_1.onFalling([](const WireDisconnect* obj_ptr) constexpr {
+    // If wire_1 is disconnected, accumulate and set the disconnected value to 1
+    c_wire_1.onFalling([](const WireDisconnect* obj_ptr) constexpr
+    {
       Serial.println("Wire 1 disconnected!");
-      obj_ptr->accumulator++;
-      obj_ptr->disconnect = 1;
+      obj_ptr->m_accumulator++;
+      obj_ptr->m_disconnected = 1;
     });
-    // same for wire_2
-    wire_2.onFalling([](const WireDisconnect* obj_ptr) constexpr {
+    // If wire_2 is disconnected, accumulate and set the disconnected value to 2
+    c_wire_2.onFalling([](const WireDisconnect* obj_ptr) constexpr
+    {
       Serial.println("Wire 2 disconnected!");
-      obj_ptr->accumulator++;
-      obj_ptr->disconnect = 2;
+      obj_ptr->m_accumulator++;
+      obj_ptr->m_disconnected = 2;
     });
-    // and wire_3
-    wire_3.onFalling([](const WireDisconnect* obj_ptr) constexpr {
+    // If wire_3 is disconnected, accumulate and set the disconnected value to 3
+    c_wire_3.onFalling([](const WireDisconnect* obj_ptr) constexpr
+    {
       Serial.println("Wire 3 disconnected!");
-      obj_ptr->accumulator++;
-      obj_ptr->disconnect = 3;
+      obj_ptr->m_accumulator++;
+      obj_ptr->m_disconnected = 3;
     });
     
-    // at the end of begin(), advance the module state from INVALID to ACTIVE
+    // Advance the module state from INVALID to ACTIVE
     this->passState();
-    // turn the status led on (blue color for live game)
-    status.blue();
+    // Turn the status led on (blue color for live game)
+    c_status_rgbled.blue();
   }
 
-  // the overridden threadFunc, this function is ran on the created task in a loop
-  void threadFunc() const override {
-    // update each wire (this might be done smarter as removing all 3 wires
-    // simultaneously might result in a passing state)
-    wire_1.update(this);
-    wire_2.update(this);
-    wire_3.update(this);
+  /// Check for disconnected wires and run the game logic.
+  void threadFunc() const override
+  {
+    // update each wire
+    c_wire_1.update(this);
+    c_wire_2.update(this);
+    c_wire_3.update(this);
 
-    // game logic: if the number of wires disconnected does not match the
-    // sequence number of the currently disconnected one, fail
-    if (accumulator != disconnect) {
+    // Game logic: if the number of wires disconnected does not match the number
+    // of the currently disconnected one, fail
+    if (m_accumulator != m_disconnected)
+    {
       this->failState();
     }
-    // else if all 3 wires have been disconnected, pass
-    else if (disconnect == 3) {
+    // But if all 3 wires have been disconnected, pass
+    else if (m_disconnected == 3)
+    {
       this->passState();
     }
 
-    // if it's in a passing state, turn the led green
-    if (this->getState() == PASSED) {
+    // If it's in a passing state, turn the led green
+    if (this->getState() == PASSED)
+    {
       Serial.println("Passed module!");
-      status.green();
+      c_status_rgbled.green();
     }
-    // else if it's in a failing state, turn the led red
-    else if (this->getState() == FAILED) {
+    // If it's in a failing state, turn the led red
+    else if (this->getState() == FAILED)
+    {
       Serial.println("Failed module!");
-      status.red();
+      c_status_rgbled.red();
     }
 
     // if any conditions met, delete the thread, as the game is finished
-    if (this->getState() == PASSED || this->getState() == FAILED) {
+    if (this->getState() == PASSED || this->getState() == FAILED)
+    {
       this->destroy();
     }
   }
 
+//===-- Member variables --------------------------------------------------===//
+
  private:
-  const Button<100, void, const WireDisconnect*> wire_1; 
-  const Button<100, void, const WireDisconnect*> wire_2; 
-  const Button<100, void, const WireDisconnect*> wire_3; 
-  const RGBLED status;
-  mutable size_t accumulator = 0;
-  mutable size_t disconnect = 0;
-}; /* class WireDisconnect */
+  const Button<100, void, const WireDisconnect*> c_wire_1; 
+  const Button<100, void, const WireDisconnect*> c_wire_2; 
+  const Button<100, void, const WireDisconnect*> c_wire_3; 
+  const RGBLED &c_status_rgbled;
+  mutable size_t m_accumulator = 0;
+  mutable size_t m_disconnected = 0;
+}; // class WireDisconnect
 
-}; /* namespace PTS */
+} // namespace PTS
 
-#endif /* BASIC_WIRE_DISCONNECT_HEADER_INCLUDED */
+#endif // MODULE_BASIC_WIRE_DISCONNECT_H
