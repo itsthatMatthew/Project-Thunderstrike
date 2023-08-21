@@ -111,7 +111,7 @@ class Module
   {
     std::lock_guard<std::mutex> lock(m_handle_lock);
     // only start new thread if none exists yet and the module is active
-    if (!m_task_handle && m_state == ACTIVE)
+    if (!m_task_handle)
     {
       xTaskCreate(
         [](void *obj) constexpr // wrapper lambda

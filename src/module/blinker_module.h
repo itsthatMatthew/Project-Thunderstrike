@@ -34,7 +34,6 @@ class BlinkerModule : public Module<>
   void begin() const override
   {
     blinker.begin();
-    this->passState();
   }
 
   /// Turns the blinker on and off at the set intervals.
