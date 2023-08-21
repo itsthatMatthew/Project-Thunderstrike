@@ -51,7 +51,21 @@ Adhering to these practices will make the code immediately easier to read for ev
 
 Testing is done with the Unity framework PlatformIO provides. If you add new functionality, you should create a new unit test for it as well. When adding multiple features, creating a subfolder might be a good idea.
 
-If your code fails the project's default unit and CI tests, it will not be merged.
+Additional code scanning is done to static analyze the codebase and check for vulnerabilities.
+
+If your code fails the project's default unit tests, CI tests or security scans, it will not be merged.
+
+## Forking and creating branches
+
+You're welcomed to fork our repository! This way you can easily to develop and add new features locally, then if you feel ready, create pull requests to merge your code into our codebase!
+
+For making this process easier for everyone, we recommend you be aware of the following branches and namings:
+
+- `main`: the main branch of the project, containing the stable version (according to best efforts). 
+- `devel`: constant development branch, from which new features are pulled into main.
+- `exp-`: prefix for new and experimental features, which are still in early development.
+- `fix-`: prefix for fixing bugs and solving issues in already written code.
+- `upd-`: prefix for updating or expanding already written code.
 
 ## Creating pull requests
 
