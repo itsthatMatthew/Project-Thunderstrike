@@ -41,7 +41,6 @@ class BuzzerModule : public Module<>
   /// Sends power to the buzzer pin at the set regular intervals.
   void threadFunc() const override
   {
-    Serial.println("tf");
     digitalWrite(c_buzzer_pin, HIGH);
     ::delayMicroseconds(/*1/f=*/ 1000000 / BUZZER_TONE);
     digitalWrite(c_buzzer_pin, LOW);
