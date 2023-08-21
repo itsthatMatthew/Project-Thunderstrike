@@ -35,7 +35,6 @@ class BuzzerModule : public Module<>
   void begin() const override
   {
     pinMode(c_buzzer_pin, OUTPUT);
-    this->passState();  
   }
 
   /// Sends power to the buzzer pin at the set regular intervals.
