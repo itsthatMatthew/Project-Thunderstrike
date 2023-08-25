@@ -24,7 +24,7 @@ void setup() {
 }
 
 void loop() {
-  if (wire_disconnect.getState() == PTS::Module<>::ACTIVE) {
+  if (wire_disconnect.getState() == PTS::Stateful::ACTIVE) {
     buzzer.resume();
     builting.on();
 
@@ -48,7 +48,7 @@ void loop() {
       wire_disconnect.failState();
     }
   }
-  else if (wire_disconnect.getState() == PTS::Module<>::FAILED) {
+  else if (wire_disconnect.getState() == PTS::Stateful::FAILED) {
     static bool has_ran = false;
     if (!has_ran) { // once
       has_ran = true;
@@ -58,7 +58,7 @@ void loop() {
       wire_disconnect.destroy();
     }
   }
-  else if (wire_disconnect.getState() == PTS::Module<>::PASSED) {
+  else if (wire_disconnect.getState() == PTS::Stateful::PASSED) {
     static bool has_ran = false;
     if (!has_ran) { // once
       has_ran = true;

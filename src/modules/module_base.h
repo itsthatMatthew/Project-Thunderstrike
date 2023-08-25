@@ -9,9 +9,10 @@
 /// \file This file contains the declarations of the Module class, which is the
 /// base class for all of the PTS module classes.
 ///
-/// Modules are state machines for a robust functionality.
-/// States have a predefined flow that changes depending on whether the module
-/// failed or passed.
+/// Modules can start new threads that are bound to them, making the usage
+/// as robust as possible. Each object may have a single task running.
+///
+/// The Module class is threadsafe
 ///
 //===----------------------------------------------------------------------===//
 
@@ -31,23 +32,12 @@ namespace PTS
 template<uint32_t STACK_DEPTH = 1024, uint32_t PRIORITY = tskIDLE_PRIORITY>
 class Module
 {
- public:
-  /// Enumerated values storing the module's possible state.
-  enum ModuleState : uint8_t
-  {
-    INVALID = 0b00,
-    ACTIVE  = 0b01,
-    PASSED  = 0b10,
-    FAILED  = 0b11,
-  };
-
 //===-- Instantiation specific functions ----------------------------------===//
 
-  /// \param module_name the object's name - it will be passed to the starting thread.
+ public:
+  /// \param module_name the object's and starting thread's name.
   explicit Module(const std::string &module_name)
     : c_module_name(module_name),
-      m_state(INVALID),
-      m_state_lock(/*default*/),
       m_task_handle(nullptr),
       m_handle_lock(/*default*/)
   { }
@@ -62,54 +52,8 @@ class Module
   /// Setup function for additional component initializations.
   virtual void begin() const = 0;
 
-//===-- State and transition specific functions ---------------------------===//
-
-  /// \return the module's current state.
-  [[nodiscard]] ModuleState getState() const { return m_state; }
-
   /// \return the module's name.
   [[nodiscard]] std::string getName() const { return c_module_name; }
-
-  /// Resets the module's state to INVALID.
-  void invalidateState() const { m_state = INVALID; }
-
-  /// Makes the module's state active only if it has been in an invalid state.
-  /// \return the module's new state. 
-  ModuleState makeActive() const
-  {
-    if (m_state == INVALID)
-      m_state = ACTIVE;
-    return m_state;
-  } 
-
-  /// Advances the module's state in a "passing" way.
-  /// \return the module's new state.
-  ModuleState passState() const
-  {
-    std::lock_guard<std::mutex> lock(m_state_lock);
-
-    switch (m_state)
-    {
-      case INVALID: m_state = ACTIVE; break;
-      case ACTIVE: m_state = PASSED; break;
-      default: /*do nothing*/ break;
-    }
-    return m_state;
-  }
-
-  /// Advances the module's state in a "failing" way.
-  /// \return the module's new state.
-  ModuleState failState() const
-  {
-    std::lock_guard<std::mutex> lock(m_state_lock);
-
-    switch (m_state)
-    {
-      case ACTIVE: m_state = FAILED; break;
-      default: /*do nothing*/ break;
-    }
-    return m_state;
-  }
 
 //===-- Threading specific functions --------------------------------------===//
 
@@ -120,7 +64,7 @@ class Module
   void start() const
   {
     std::lock_guard<std::mutex> lock(m_handle_lock);
-    // only start new thread if none exists yet and the module is active
+    // only start new thread if none exists yet
     if (!m_task_handle)
     {
       xTaskCreate(
@@ -139,6 +83,18 @@ class Module
       );
     }
   }
+  // Explainer about the black magic fuckery going on inside the function:
+  // Since the xTaskCreate(...) function takes a function pointer to run and
+  // the parameters as a void*, to be able to override the threadFunc() method
+  // yet still run it, some odd decisions had to be made.
+  // The wrapper lambda is the function to be ran, so it cannot have any capture
+  // clause, and takes a void* as its single parameter. Since the parameter is
+  // the parent object of the thread, we want its overriden threadFunc() to be
+  // ran, so it's casted back into its "original" type from void*, then its
+  // threadFunc() is called.
+  // The xTaskCreate() functions "pvParameters" argument is then this parent
+  // object, which is achieved with removing the const qualifyer (the method is
+  // marked const), so that the lambda can use it.
 
   /// Suspends the object's thread.
   void suspend() const
@@ -178,8 +134,6 @@ class Module
 
  private:
   const std::string c_module_name;
-  mutable ModuleState m_state;
-  mutable std::mutex m_state_lock;
   mutable TaskHandle_t m_task_handle;
   mutable std::mutex m_handle_lock;
 }; // class Module
