@@ -22,6 +22,7 @@
 #include <array>
 #include <initializer_list>
 #include <queue>
+#include <optional>
 #include "module.h"
 #include "utils/button.h"
 
@@ -139,13 +140,17 @@ class Keypad : public Module<>
 
 
   /// Reads one input character from the buffer.
-  /// \return the next character.
-  char readOne() const
+  /// \return the next character as std::optional (empty if the buffer is too).
+  std::optional<char> readOne() const
   {
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 
-    auto temp = m_input_buffer.front();
-    m_input_buffer.pop();
+    std::optional<char> temp{};
+    if (!m_input_buffer.empty())
+    {
+      temp = m_input_buffer.front();
+      m_input_buffer.pop();
+    }
     return temp;
   }
 
