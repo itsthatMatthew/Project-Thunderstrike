@@ -4,7 +4,7 @@
 
 class EmptyModule : public PTS::Module<> {
  public:
-  EmptyModule(const char const *name) : Module(name) { }
+  EmptyModule(const std::string &name) : Module(name) { }
   void begin() const override { }
   void threadFunc() const override { }
 };
