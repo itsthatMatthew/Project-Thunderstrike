@@ -1,4 +1,4 @@
-//===-- module/buzzer_module.h - Buzzer module base class definition ------===//
+//===-- modules/hw/buzzer_module.h - Buzzer module base class definition --===//
 //
 // Project-Thunderstrike (PTS) collection header file.
 // Find more information at:
@@ -11,10 +11,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef MODULE_BUZZER_MODULE_H
-#define MODULE_BUZZER_MODULE_H
+#ifndef MODULES_HW_BUZZER_MODULE_H
+#define MODULES_HW_BUZZER_MODULE_H
 
-#include "module.h"
+#include "modules/module_base.h"
 
 namespace PTS
 {
@@ -52,4 +52,4 @@ class BuzzerModule : public Module<>
 
 } // namespace PTS
 
-#endif // MODULE_BUZZER_MODULE_H
+#endif // MODULES_HW_BUZZER_MODULE_H

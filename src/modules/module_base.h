@@ -1,4 +1,4 @@
-//===-- module/module.h - Module base class definition --------------------===//
+//===-- modules/module_base.h - Module base class definition --------------===//
 //
 // Project-Thunderstrike (PTS) collection header file.
 // Find more information at:
@@ -15,8 +15,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef MODULE_MODULE_H
-#define MODULE_MODULE_H
+#ifndef MODULES_MODULE_BASE_H
+#define MODULES_MODULE_BASE_H
 
 #include <mutex>
 #include <string>
@@ -186,4 +186,4 @@ class Module
 
 } // namespace PTS
 
-#endif // MODULE_MODULE_H
+#endif // MODULES_MODULE_BASE_H

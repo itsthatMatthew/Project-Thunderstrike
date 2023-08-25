@@ -1,4 +1,4 @@
-//===-- module/basic_wire_disconnect.h - WireDisconnect class definition --===//
+//===-- modules/basic_wire_disconnect.h - WireDisconnect class definition -===//
 //
 // Project-Thunderstrike (PTS) collection header file.
 // Find more information at:
@@ -18,12 +18,12 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef MODULE_BASIC_WIRE_DISCONNECT_H
-#define MODULE_BASIC_WIRE_DISCONNECT_H
+#ifndef MODULES_BASIC_WIRE_DISCONNECT_H
+#define MODULES_BASIC_WIRE_DISCONNECT_H
 
-#include "module.h"
-#include "utils/button.h"
-#include "utils/rgbled.h"
+#include "module_base.h"
+#include "utils/hw/button.h"
+#include "utils/hw/rgbled.h"
 
 namespace PTS
 {
@@ -133,4 +133,4 @@ class WireDisconnect : public Module<>
 
 } // namespace PTS
 
-#endif // MODULE_BASIC_WIRE_DISCONNECT_H
+#endif // MODULES_BASIC_WIRE_DISCONNECT_H

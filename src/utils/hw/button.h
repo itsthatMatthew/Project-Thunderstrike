@@ -1,4 +1,4 @@
-//===-- utils/button.h - Button utility class definition ------------------===//
+//===-- utils/hw/button.h - Button utility class definition ---------------===//
 //
 // Project-Thunderstrike (PTS) collection header file.
 // Find more information at:
@@ -14,8 +14,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef UTILS_BUTTON_H
-#define UTILS_BUTTON_H
+#ifndef UTILS_HW_BUTTON_H
+#define UTILS_HW_BUTTON_H
 
 #include <Arduino.h>
 
@@ -154,4 +154,4 @@ class Button
 
 } // namespace PTS
 
-#endif // UTILS_BUTTON_H
+#endif // UTILS_HW_BUTTON_H
