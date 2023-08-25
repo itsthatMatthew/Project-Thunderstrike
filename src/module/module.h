@@ -19,14 +19,15 @@
 #define MODULE_MODULE_H
 
 #include <mutex>
+#include <string>
 #include <Arduino.h>
 
 namespace PTS
 {
 
 /// Module base class.
-/// \tparam STACK_DEPTH the desired stack depth.
-/// \tparam PRIORITY the desired task priority.
+/// \tparam STACK_DEPTH the desired stack depth in words (defaults to 1024).
+/// \tparam PRIORITY the desired task priority (defaults to tskIDLE_PRIORITY).
 template<uint32_t STACK_DEPTH = 1024, uint32_t PRIORITY = tskIDLE_PRIORITY>
 class Module
 {
@@ -42,9 +43,9 @@ class Module
 
 //===-- Instantiation specific functions ----------------------------------===//
 
-  /// \param name the object's name - it will be passed to the starting thread.
-  explicit Module(const char *const name)
-    : c_name(name),
+  /// \param module_name the object's name - it will be passed to the starting thread.
+  explicit Module(const std::string &module_name)
+    : c_module_name(module_name),
       m_state(INVALID),
       m_state_lock(/*default*/),
       m_task_handle(nullptr),
@@ -67,13 +68,22 @@ class Module
   [[nodiscard]] ModuleState getState() const { return m_state; }
 
   /// \return the module's name.
-  [[nodiscard]] char *const getName() const { return c_name; }
+  [[nodiscard]] std::string getName() const { return c_module_name; }
 
   /// Resets the module's state to INVALID.
   void invalidateState() const { m_state = INVALID; }
 
+  /// Makes the module's state active only if it has been in an invalid state.
+  /// \return the module's new state. 
+  ModuleState makeActive() const
+  {
+    if (m_state == INVALID)
+      m_state = ACTIVE;
+    return m_state;
+  } 
+
   /// Advances the module's state in a "passing" way.
-  /// \return the module's new state
+  /// \return the module's new state.
   ModuleState passState() const
   {
     std::lock_guard<std::mutex> lock(m_state_lock);
@@ -88,7 +98,7 @@ class Module
   }
 
   /// Advances the module's state in a "failing" way.
-  /// \return the module's new state
+  /// \return the module's new state.
   ModuleState failState() const
   {
     std::lock_guard<std::mutex> lock(m_state_lock);
@@ -121,7 +131,7 @@ class Module
             static_cast<decltype(this)>(obj)->threadFunc();
           }
         },
-        c_name,
+        c_module_name.c_str(),
         STACK_DEPTH,
         const_cast<Module*>(this), // remove const qualifyer (API needs void*)
         PRIORITY,
@@ -131,7 +141,8 @@ class Module
   }
 
   /// Suspends the object's thread.
-  void suspend() const {
+  void suspend() const
+  {
     std::lock_guard<std::mutex> lock(m_handle_lock);
 
     if (m_task_handle)
@@ -141,7 +152,8 @@ class Module
   }
 
   /// Resumes the object's thread.
-  void resume() const {
+  void resume() const
+  {
     std::lock_guard<std::mutex> lock(m_handle_lock);
 
     if (m_task_handle)
@@ -151,7 +163,8 @@ class Module
   }
 
   /// Deletes the object's thread.
-  void destroy() const {
+  void destroy() const
+  {
     std::lock_guard<std::mutex> lock(m_handle_lock);
 
     if (m_task_handle)
@@ -164,7 +177,7 @@ class Module
 //===-- Member variables --------------------------------------------------===//
 
  private:
-  const char *const c_name;
+  const std::string c_module_name;
   mutable ModuleState m_state;
   mutable std::mutex m_state_lock;
   mutable TaskHandle_t m_task_handle;
