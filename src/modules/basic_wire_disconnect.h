@@ -22,6 +22,7 @@
 #define MODULES_BASIC_WIRE_DISCONNECT_H
 
 #include "module_base.h"
+#include "stateful_base.h"
 #include "utils/hw/button.h"
 #include "utils/hw/rgbled.h"
 
@@ -29,7 +30,7 @@ namespace PTS
 {
 
 /// WireDisconnect class
-class WireDisconnect : public Module<>
+class WireDisconnect : public Module<>, public Stateful
 {
 //===-- Instantiation specific functions ----------------------------------===//
 
@@ -38,6 +39,7 @@ class WireDisconnect : public Module<>
                           uint8_t wire_1, uint8_t wire_2, uint8_t wire_3,
                           const RGBLED &led_ref)
   : Module(name),
+    Stateful(),
     c_wire_1(wire_1),
     c_wire_2(wire_2),
     c_wire_3(wire_3),
