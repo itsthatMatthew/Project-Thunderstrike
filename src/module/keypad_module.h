@@ -81,7 +81,7 @@ class Keypad : public Module<>
 
 //===-- Instantiation specific functions ----------------------------------===//
  public:
-  explicit Keypad(const char *const module_name,
+  explicit Keypad(const std::string &module_name,
                   std::initializer_list<uint8_t> col_pins,
                   std::initializer_list<uint8_t> row_pins,
                   std::array<std::array<char, COLS>, ROWS> &&char_set)
