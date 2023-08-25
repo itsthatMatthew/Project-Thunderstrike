@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include <unity.h>
-#include "module/module.h"
+#include "modules/module_base.h"
 
 class EmptyModule : public PTS::Module<> {
  public:
