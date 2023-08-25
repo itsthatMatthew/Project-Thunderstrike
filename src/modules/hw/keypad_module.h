@@ -1,4 +1,4 @@
-//===-- module/keypad_module.h - Keypad class definition ------------------===//
+//===-- modules/hw/keypad_module.h - Keypad class definition --------------===//
 //
 // Project-Thunderstrike (PTS) collection header file.
 // Find more information at:
@@ -15,16 +15,16 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef MODULE_KEYPAD_MODULE_H
-#define MODULE_KEYPAD_MODULE_H
+#ifndef MODULES_HW_KEYPAD_MODULE_H
+#define MODULES_HW_KEYPAD_MODULE_H
 
 #include <mutex>
 #include <array>
 #include <initializer_list>
 #include <queue>
 #include <optional>
-#include "module.h"
-#include "utils/button.h"
+#include "modules/module_base.h"
+#include "utils/hw/button.h"
 
 namespace PTS
 {
@@ -189,4 +189,4 @@ class Keypad : public Module<>
 
 } // namespace PTS
 
-#endif // MODULE_KEYPAD_MODULE_H
+#endif // MODULES_HW_KEYPAD_MODULE_H

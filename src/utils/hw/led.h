@@ -1,4 +1,4 @@
-//===-- utils/led.h - LED utility class definition ------------------------===//
+//===-- utils/hw/led.h - LED utility class definition ---------------------===//
 //
 // Project-Thunderstrike (PTS) collection header file.
 // Find more information at:
@@ -11,8 +11,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef UTILS_LED_H
-#define UTILS_LED_H
+#ifndef UTILS_HW_LED_H
+#define UTILS_HW_LED_H
 
 #include <Arduino.h>
 
@@ -44,4 +44,4 @@ class LED
 
 } // namespace PTS
 
-#endif // UTILS_LED_H
+#endif // UTILS_HW_LED_H

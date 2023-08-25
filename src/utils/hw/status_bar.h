@@ -1,4 +1,4 @@
-//===-- utils/status_bar.h - StatusBar class definition -------------------===//
+//===-- utils/hw/status_bar.h - StatusBar class definition ----------------===//
 //
 // Project-Thunderstrike (PTS) collection header file.
 // Find more information at:
@@ -11,8 +11,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef UTILS_STATUS_BAR_H
-#define UTILS_STATUS_BAR_H
+#ifndef UTILS_HW_STATUS_BAR_H
+#define UTILS_HW_STATUS_BAR_H
 
 #include <array>
 #include "led.h"
@@ -62,4 +62,4 @@ class StatusBar {
 
 } // namespace PTS
 
-#endif // UTILS_STATUS_BAR_H
+#endif // UTILS_HW_STATUS_BAR_H

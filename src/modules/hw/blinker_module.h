@@ -1,4 +1,4 @@
-//===-- module/blinker_module.h - Blinker module base class definition ----===//
+//===-- modules/blinker_module.h - Blinker module base class definition ---===//
 //
 // Project-Thunderstrike (PTS) collection header file.
 // Find more information at:
@@ -11,11 +11,11 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef MODULE_BLINKER_MODULE_H
-#define MODULE_BLINKER_MODULE_H
+#ifndef MODULES_HW_BLINKER_MODULE_H
+#define MODULES_HW_BLINKER_MODULE_H
 
-#include "module.h"
-#include "utils/led.h"
+#include "modules/module_base.h"
+#include "utils/hw/led.h"
 
 namespace PTS
 {
@@ -51,4 +51,4 @@ class BlinkerModule : public Module<>
 
 } // namespace PTS
 
-#endif // MODULE_BLINKER_MODULE_H
+#endif // MODULES_HW_BLINKER_MODULE_H

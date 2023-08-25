@@ -1,7 +1,7 @@
 #include <Arduino.h>
-#include "module/basic_wire_disconnect.h" 
-#include "module/buzzer_module.h"
-#include "utils/led.h"
+#include "modules/basic_wire_disconnect.h" 
+#include "modules/hw/buzzer_module.h"
+#include "utils/hw/led.h"
 
 PTS::RGBLED wire_disconnect_status_led(GPIO_NUM_21, GPIO_NUM_22, GPIO_NUM_23);
 PTS::WireDisconnect wire_disconnect("wire disconnect",
@@ -13,10 +13,6 @@ PTS::LED builting(LED_BUILTIN);
 uint32_t buzzer_delay = 1000;
 
 void setup() {
-  //pinMode(GPIO_NUM_19, OUTPUT);
-  //digitalWrite(GPIO_NUM_19, HIGH);
-  //delay(10000);
-
   Serial.begin(115200);
 
   wire_disconnect.begin();
@@ -25,8 +21,6 @@ void setup() {
 
   wire_disconnect.start();
   buzzer.start();
-
-  //buzzer.suspend();
 }
 
 void loop() {
