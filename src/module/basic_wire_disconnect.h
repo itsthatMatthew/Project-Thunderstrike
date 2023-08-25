@@ -34,7 +34,7 @@ class WireDisconnect : public Module<>
 //===-- Instantiation specific functions ----------------------------------===//
 
  public:
-  explicit WireDisconnect(const char *const name,
+  explicit WireDisconnect(const std::string &name,
                           uint8_t wire_1, uint8_t wire_2, uint8_t wire_3,
                           const RGBLED &led_ref)
   : Module(name),

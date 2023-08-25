@@ -26,9 +26,8 @@ class BuzzerModule : public Module<>
 {
 //===-- Instantiation specific functions and threading function -----------===//
  public:
-  explicit BuzzerModule(const char *const name, const uint8_t pin)
-  : Module(name),
-    c_buzzer_pin(pin)
+  explicit BuzzerModule(const std::string &name, const uint8_t pin)
+  : Module(name), c_buzzer_pin(pin)
   { }
 
   /// Sets up buzzer pin and makes the module active.

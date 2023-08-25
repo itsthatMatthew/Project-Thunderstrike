@@ -25,9 +25,8 @@ class BlinkerModule : public Module<>
 {
 //===-- Instantiation specific functions and threading function -----------===//
  public:
-  explicit BlinkerModule(const char *const name, const uint8_t pin)
-  : Module(name),
-    blinker(pin)
+  explicit BlinkerModule(const std::string &name, const uint8_t pin)
+  : Module(name), blinker(pin)
   { }
   
   /// Sets up blinker pin and makes the module active.
