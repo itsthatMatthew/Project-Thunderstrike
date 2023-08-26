@@ -21,10 +21,10 @@
 #include <mutex>
 #include <array>
 #include <initializer_list>
-#include <queue>
 #include <optional>
 #include "modules/module_base.h"
 #include "utils/hw/button.h"
+#include "utils/sw/circular_buffer.h"
 
 namespace PTS
 {
@@ -115,21 +115,6 @@ class Keypad : public Module<>
 
 //===-- Input handling functions ------------------------------------------===//
 
-// TODO: stack based circular buffer implementation, std::queue for now (heap!)
-// POSSIBLE CIRCULAR INPUT BUFFER EXPLAINER
-//
-//  default pos of m_buffer_write_ptr
-//  |       after writing 4 values
-//  |       |
-//  v       v
-// +-+-+-+-+-+-+-+ cell amount set by BUFFER_SIZE
-// |r|r|w|w|*|*|*|
-// +-+-+-+-+-+-+-+ ptrs wrap around at the end of buffer
-//  ^   ^
-//  |   |
-//  |   after reading 2 values
-//  default pos of m_buffer_read_ptr
-
   /// Loops trough the buttons to determine which one is pressed.
   void threadFunc() const override
   {
@@ -182,7 +167,7 @@ class Keypad : public Module<>
   // The available character set on the keypad.
   std::array<std::array<char, COLS>, ROWS> c_char_set;
   // The input buffer.
-  mutable std::queue<char> m_input_buffer;
+  mutable CircularBuffer<char, 16> m_input_buffer;
   // Mutex for the locking of the input buffer.
   mutable std::mutex m_buffer_lock;
 }; // class Keypad
