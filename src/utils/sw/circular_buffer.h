@@ -103,7 +103,7 @@ class CircularBuffer {
   size_type size() const
   {
     return m_write_offset < m_read_offset ?
-              m_ m_read_offset - m_write_offset :
+              m_read_offset - m_write_offset :
               m_write_offset - m_read_offset;
   }
 
