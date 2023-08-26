@@ -2,6 +2,7 @@
 #include "modules/basic_wire_disconnect.h" 
 #include "modules/hw/buzzer_module.h"
 #include "utils/hw/led.h"
+#include "modules/hw/keypad_module.h"
 
 PTS::RGBLED wire_disconnect_status_led(GPIO_NUM_21, GPIO_NUM_22, GPIO_NUM_23);
 PTS::WireDisconnect wire_disconnect("wire disconnect",
@@ -12,18 +13,31 @@ PTS::BuzzerModule<12000> buzzer("buzzer", GPIO_NUM_19);
 PTS::LED builting(LED_BUILTIN);
 uint32_t buzzer_delay = 1000;
 
+PTS::Keypad<3, 4> keypad("keypad", {25, 33, 32}, {35, 34, 39, 36},
+                          std::array<std::array<char, 3>, 4>{
+                            std::array<char, 3>{'1', '2', '3'},
+                            std::array<char, 3>{'4', '5', '6'},
+                            std::array<char, 3>{'7', '8', '9'},
+                            std::array<char, 3>{'*', '0', '#'}
+                          });
+
 void setup() {
   Serial.begin(115200);
 
   wire_disconnect.begin();
   buzzer.begin();
   builting.begin();
+  keypad.begin();
 
   wire_disconnect.start();
   buzzer.start();
+  keypad.start();
 }
 
 void loop() {
+  if (auto read_char = keypad.readOne(); read_char)
+    Serial.print(read_char.value());
+
   if (wire_disconnect.getState() == PTS::Stateful::ACTIVE) {
     buzzer.resume();
     builting.on();
