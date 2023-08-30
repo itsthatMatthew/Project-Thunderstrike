@@ -63,8 +63,10 @@ class CircularBuffer {
   /// Creates a container filled with the values given as parameter.
   /// \param init_list initializer_list of the stored type.
   explicit CircularBuffer(std::initializer_list<value_type> init_list)
-  : m_write_offset(init_list.size()), m_read_offset(0), m_buffer{init_list}
-  { }
+  : m_write_offset(init_list.size()), m_read_offset(0), m_buffer{0}
+  {
+    std::copy(init_list.begin(), init_list.end(), m_buffer);
+  }
 
   ~CircularBuffer() = default;
 
@@ -89,8 +91,8 @@ class CircularBuffer {
   /// Accesses the last element.
   /// If the container is empty, the returned reference should be discarded.
   /// @return the last element in the container.
-  reference back() { return m_buffer[m_write_offset]; }
-  const_reference back() const { return m_buffer[m_write_offset]; }
+  reference back() { return m_buffer[correct_wrap(m_write_offset - 1)]; }
+  const_reference back() const { return m_buffer[correct_wrap(m_write_offset - 1)]; }
 
 //===-- Capacity ----------------------------------------------------------===//
 
