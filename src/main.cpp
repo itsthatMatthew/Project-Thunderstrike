@@ -6,10 +6,9 @@
 
 PTS::RGBLED wire_disconnect_status_led(GPIO_NUM_21, GPIO_NUM_22, GPIO_NUM_23);
 PTS::WireDisconnect wire_disconnect("wire disconnect",
-                                    GPIO_NUM_16, GPIO_NUM_17, GPIO_NUM_4,
-                                    wire_disconnect_status_led);
+                                    GPIO_NUM_16, GPIO_NUM_17, GPIO_NUM_4);
                                     
-PTS::BuzzerModule<12000> buzzer("buzzer", GPIO_NUM_19);
+PTS::BuzzerModule<10000> buzzer("buzzer", GPIO_NUM_19);
 PTS::LED builting(LED_BUILTIN);
 uint32_t buzzer_delay = 1000;
 
@@ -63,8 +62,7 @@ void loop() {
     }
   }
   else if (wire_disconnect.getState() == PTS::Stateful::FAILED) {
-    static bool has_ran = false;
-    if (!has_ran) { // once
+    if (static bool has_ran = false; !has_ran) { // once
       has_ran = true;
       buzzer.resume();
       delay(2000);
@@ -73,8 +71,7 @@ void loop() {
     }
   }
   else if (wire_disconnect.getState() == PTS::Stateful::PASSED) {
-    static bool has_ran = false;
-    if (!has_ran) { // once
+    if (static bool has_ran = false; !has_ran) { // once
       has_ran = true;
       buzzer.resume();
       delay(50);
