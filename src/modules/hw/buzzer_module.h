@@ -30,7 +30,7 @@ class BuzzerModule : public Module<1024, TASK_PRIORITY>
 //===-- Instantiation specific functions and threading function -----------===//
  public:
   explicit BuzzerModule(const std::string &name, const uint8_t pin)
-  : Module(name), c_buzzer_pin(pin)
+  : Module<1024, TASK_PRIORITY>(name), c_buzzer_pin(pin)
   { }
 
   /// Sets up buzzer pin and makes the module active.
