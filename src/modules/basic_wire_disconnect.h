@@ -36,14 +36,12 @@ class WireDisconnect : public Module<>, public Stateful
 
  public:
   explicit WireDisconnect(const std::string &name,
-                          uint8_t wire_1, uint8_t wire_2, uint8_t wire_3,
-                          const RGBLED &led_ref)
+                          uint8_t wire_1, uint8_t wire_2, uint8_t wire_3)
   : Module(name),
     Stateful(),
     c_wire_1(wire_1),
     c_wire_2(wire_2),
-    c_wire_3(wire_3),
-    c_status_rgbled(led_ref)
+    c_wire_3(wire_3)
     { }
   
   /// Begin members and set callbacks.
@@ -52,7 +50,6 @@ class WireDisconnect : public Module<>, public Stateful
     c_wire_1.begin();
     c_wire_2.begin();
     c_wire_3.begin();
-    c_status_rgbled.begin();
 
     // If wire_1 is disconnected, accumulate and set the disconnected value to 1
     c_wire_1.onFalling([](const WireDisconnect* obj_ptr) constexpr
@@ -78,8 +75,6 @@ class WireDisconnect : public Module<>, public Stateful
     
     // Advance the module state from INVALID to ACTIVE
     this->passState();
-    // Turn the status led on (blue color for live game)
-    c_status_rgbled.blue();
   }
 
   /// Check for disconnected wires and run the game logic.
@@ -106,13 +101,11 @@ class WireDisconnect : public Module<>, public Stateful
     if (this->getState() == PASSED)
     {
       Serial.println("Passed module!");
-      c_status_rgbled.green();
     }
     // If it's in a failing state, turn the led red
     else if (this->getState() == FAILED)
     {
       Serial.println("Failed module!");
-      c_status_rgbled.red();
     }
 
     // if any conditions met, delete the thread, as the game is finished
@@ -128,7 +121,6 @@ class WireDisconnect : public Module<>, public Stateful
   const Button<100, void, const WireDisconnect*> c_wire_1; 
   const Button<100, void, const WireDisconnect*> c_wire_2; 
   const Button<100, void, const WireDisconnect*> c_wire_3; 
-  const RGBLED &c_status_rgbled;
   mutable size_t m_accumulator = 0;
   mutable size_t m_disconnected = 0;
 }; // class WireDisconnect
