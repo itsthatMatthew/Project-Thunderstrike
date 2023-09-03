@@ -20,9 +20,12 @@ namespace PTS
 {
 
 /// BuzzerModule class
-/// \tparam BUZZER_TONE the desired tone in frequency (Hz). 
-template<uint32_t BUZZER_TONE>
-class BuzzerModule : public Module<>
+/// \tparam BUZZER_TONE the desired tone in frequency (Hz).
+/// \tparam TASK_PRIORITY the underlying task's priority. If it's set to 0,
+/// weird cutting audio effects might be heard. If it's set higher, other tasks
+/// might suffer from not enough processor time. Choose wisely.
+template<uint32_t BUZZER_TONE, uint32_t TASK_PRIORITY = 1>
+class BuzzerModule : public Module<1024, TASK_PRIORITY>
 {
 //===-- Instantiation specific functions and threading function -----------===//
  public:
