@@ -37,12 +37,21 @@ class StatusBar {
 
 //===-- LED manipulation functions ----------------------------------------===//
 
-  /// Turns the nex LED in the array on.
+  /// Turns the next LED in the array on.
   void next() const
   {
     if (m_set_led < NUM)
     {
       c_led_array[m_set_led++].on();
+    }
+  }
+
+  /// Turns the last LED in the array off.
+  void back() const
+  {
+    if (m_set_led > 0)
+    {
+      c_led_array[--m_set_led].off();
     }
   }
 
