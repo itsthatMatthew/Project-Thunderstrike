@@ -20,12 +20,16 @@
 #ifndef BUNDLES_COUNTER_STRIKE_COUNTER_STRIKE_STYLED_H
 #define BUNDLES_COUNTER_STRIKE_COUNTER_STRIKE_STYLED_H
 
+#include <string>
+
 #include "utils/utils.h"
 #include "modules/modules.h"
 #include "modules/basic_wire_disconnect.h"
 
 namespace PTS
 {
+
+static const size_t PASSCODE_MAX_SIZE = 4;
 
 /// CounterStrikeStyledBomb class
 /// Game logic: the bomb first has to be armed ("planted"), until that point, no
@@ -41,7 +45,9 @@ class CounterStrikeStyledBomb : public Module<>, public Stateful
     Stateful(),
     c_blinker_led(LED_BUILTIN),
     c_state_led(GPIO_NUM_21, GPIO_NUM_22, GPIO_NUM_23),
-    c_strikes_bar(std::array<LED, 3>{LED(GPIO_NUM_13), LED(GPIO_NUM_12), LED(GPIO_NUM_14)}),
+    c_strikes_bar(std::array<LED, 3>{LED(GPIO_NUM_13),
+                                     LED(GPIO_NUM_12),
+                                     LED(GPIO_NUM_14)}),
     c_ready_led(GPIO_NUM_27),
     c_armed_led(GPIO_NUM_26),
     c_keypad_module("cs_keypad", {25, 33, 32}, {35, 34, 39, 36},
@@ -54,6 +60,12 @@ class CounterStrikeStyledBomb : public Module<>, public Stateful
     c_buzzer_module("cs_buzzer", GPIO_NUM_19)
   { }
 
+  ~CounterStrikeStyledBomb()
+  {
+    c_keypad_module.destroy();
+    c_wire_disconnect_module.destroy();
+    c_buzzer_module.destroy();
+  }
 
   void begin() const override
   {
@@ -68,14 +80,122 @@ class CounterStrikeStyledBomb : public Module<>, public Stateful
 
     c_keypad_module.start();
     c_wire_disconnect_module.start();
-    c_buzzer_module.start();
-
-    passState();
+    //c_buzzer_module.start();
   }
 
   void threadFunc() const override
   {
-    //TODO
+    switch (getState())
+    {
+    case INVALID:
+      if (auto read_char = c_keypad_module.readOne(); read_char)
+      {
+        const size_t passocde_size = entered_passcode.size();
+        switch (read_char.value())
+        {
+        case '*': // backspace
+          if (!entered_passcode.empty()) {
+            entered_passcode.pop_back();
+            if (passocde_size == PASSCODE_MAX_SIZE)
+              c_ready_led.off();
+            else
+              c_strikes_bar.back();
+            Serial.print("The current passcode is: ");
+            Serial.println(entered_passcode.c_str());
+          }
+          break;
+        case '#': // enter
+          if (passocde_size == PASSCODE_MAX_SIZE) {
+            saved_passcode = entered_passcode;
+            c_ready_led.off();
+            c_strikes_bar.clear();
+            c_armed_led.on();
+            passState();
+            Serial.print("Saved passcode: ");
+            Serial.println(saved_passcode.c_str());
+          }
+          break;
+        default:  // value
+          if (passocde_size < PASSCODE_MAX_SIZE) {
+            entered_passcode += read_char.value();
+            if (passocde_size == PASSCODE_MAX_SIZE - 1)
+              c_ready_led.on();
+            else
+              c_strikes_bar.next();
+            Serial.print("The current passcode is: ");
+            Serial.println(entered_passcode.c_str());
+          }
+          break;
+        }
+      }
+      break;
+
+    case ACTIVE:
+      // TODO
+      break;
+
+    default:
+      // nothing on passed or failed state
+      break;
+    }
+
+    // old main code:
+    /*
+    if (auto read_char = keypad.readOne(); read_char)
+      Serial.print(read_char.value());
+
+    if (wire_disconnect.getState() == PTS::Stateful::ACTIVE) {
+      buzzer.resume();
+      builting.on();
+
+      delay(100);
+
+      buzzer.suspend();
+      builting.off();
+
+      delay(buzzer_delay);
+
+      if (buzzer_delay > 100) {
+        buzzer_delay -= 10;
+      }
+      else if (buzzer_delay > 15) {
+        buzzer_delay -= 5;
+      }
+      else if (buzzer_delay > 1) {
+        buzzer_delay -= 1;
+      }
+      else {
+        wire_disconnect.failState();
+      }
+    }
+    else if (wire_disconnect.getState() == PTS::Stateful::FAILED) {
+      if (static bool has_ran = false; !has_ran) { // once
+        has_ran = true;
+        buzzer.resume();
+        delay(2000);
+        buzzer.destroy();
+        wire_disconnect.destroy();
+      }
+    }
+    else if (wire_disconnect.getState() == PTS::Stateful::PASSED) {
+      if (static bool has_ran = false; !has_ran) { // once
+        has_ran = true;
+        buzzer.resume();
+        delay(50);
+        buzzer.suspend();
+        delay(50);
+        buzzer.resume();
+        delay(50);
+        buzzer.suspend();
+        delay(50);
+        buzzer.resume();
+        delay(50);
+        buzzer.suspend();
+        buzzer.destroy();
+        wire_disconnect.destroy();
+      }
+    }
+    */
   }
 
  private:
@@ -87,6 +207,9 @@ class CounterStrikeStyledBomb : public Module<>, public Stateful
   const Keypad<3, 4>        c_keypad_module;
   const WireDisconnect      c_wire_disconnect_module;
   const BuzzerModule<10000> c_buzzer_module;
+
+  mutable std::string entered_passcode;
+  mutable std::string saved_passcode;
 }; // CounterStrikeStyledBomb
 
 } // namespace PTS
