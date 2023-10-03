@@ -21,6 +21,7 @@
 
 #include <mutex>
 #include <string>
+#include "utils/sw/log.h"
 #include <Arduino.h>
 
 namespace PTS
@@ -29,7 +30,10 @@ namespace PTS
 /// Module base class.
 /// \tparam STACK_DEPTH the desired stack depth in words (defaults to 1024).
 /// \tparam PRIORITY the desired task priority (defaults to tskIDLE_PRIORITY).
-template<uint32_t STACK_DEPTH = 1024, uint32_t PRIORITY = tskIDLE_PRIORITY>
+/// \tparam FREQUENCY the desired task frequency in HZ (defaults to 10).
+template<uint32_t STACK_DEPTH = 1024,
+         uint32_t PRIORITY = tskIDLE_PRIORITY,
+         uint32_t FREQUENCY = 10>
 class Module
 {
 //===-- Instantiation specific functions ----------------------------------===//
@@ -40,7 +44,7 @@ class Module
     : c_module_name(module_name),
       m_task_handle(nullptr),
       m_handle_lock(/*default*/)
-  { }
+  { LOG::I("Module \"%\" constructed.", module_name.c_str()); }
   
   /// Virtual destructor.
   virtual ~Module() = default;
@@ -70,9 +74,14 @@ class Module
       xTaskCreate(
         [](void *obj) constexpr // wrapper lambda
         {
+          uint32_t last_tick = xTaskGetTickCount();
           for(;;) // runs the threadFunc() in an infinite loop
-          { 
+          {
             static_cast<decltype(this)>(obj)->threadFunc();
+            if (pdFALSE == xTaskDelayUntil(&last_tick, configTICK_RATE_HZ / FREQUENCY))
+              LOG::W("Module \"%\" was not delayed (frequency set to %)!",
+                     static_cast<decltype(this)>(obj)->c_module_name.c_str(),
+                     FREQUENCY);
           }
         },
         c_module_name.c_str(),
@@ -81,6 +90,7 @@ class Module
         PRIORITY,
         &m_task_handle
       );
+      LOG::I("Module \"%\" started.", c_module_name.c_str());
     }
   }
   // Explainer about the black magic fuckery going on inside the function:
@@ -104,6 +114,7 @@ class Module
     if (m_task_handle)
     {
       vTaskSuspend(m_task_handle);
+      LOG::I("Module \"%\" suspended.", c_module_name.c_str());
     }
   }
 
@@ -115,6 +126,7 @@ class Module
     if (m_task_handle)
     {
       vTaskResume(m_task_handle);
+      LOG::I("Module \"%\" resumed.", c_module_name.c_str());
     }
   }
 
@@ -127,6 +139,7 @@ class Module
     {
       vTaskDelete(m_task_handle);
       m_task_handle = nullptr;
+      LOG::I("Module \"%\" destroyed.", c_module_name.c_str());
     }
   }
 
