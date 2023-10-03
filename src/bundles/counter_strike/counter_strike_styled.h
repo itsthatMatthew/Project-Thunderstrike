@@ -37,7 +37,7 @@ static const size_t PASSCODE_MAX_SIZE = 4;
 /// off, there is exactly 40 seconds to disarm ("defuse") the bomb.
 /// Arming can be done by entering an arbitrary sequence of numbers, to disarm
 /// it, one has to short two specific pins.
-class CounterStrikeStyledBomb : public Module<>, public Stateful
+class CounterStrikeStyledBomb : public Module<2024>, public Stateful
 {
  public:
   CounterStrikeStyledBomb()
@@ -80,7 +80,7 @@ class CounterStrikeStyledBomb : public Module<>, public Stateful
 
     c_keypad_module.start();
     c_wire_disconnect_module.start();
-    //c_buzzer_module.start();
+    c_buzzer_module.start();
   }
 
   void threadFunc() const override
@@ -100,9 +100,10 @@ class CounterStrikeStyledBomb : public Module<>, public Stateful
               c_ready_led.off();
             else
               c_strikes_bar.back();
-            Serial.print("The current passcode is: ");
-            Serial.println(entered_passcode.c_str());
+            LOG::D("The current passcode is: %", entered_passcode.c_str());
           }
+          else
+            LOG::W("The passcode is already empty!");
           break;
         case '#': // enter
           if (passocde_size == PASSCODE_MAX_SIZE) {
@@ -111,8 +112,12 @@ class CounterStrikeStyledBomb : public Module<>, public Stateful
             c_strikes_bar.clear();
             c_armed_led.on();
             passState();
-            Serial.print("Saved passcode: ");
-            Serial.println(saved_passcode.c_str());
+            LOG::I("Saved passcode: %", saved_passcode.c_str());
+          }
+          else {
+            LOG::W("Cannot save passcode with less than % digits!",
+                    PASSCODE_MAX_SIZE);
+            LOG::D("The current passcode is: %", entered_passcode.c_str());
           }
           break;
         default:  // value
@@ -122,8 +127,12 @@ class CounterStrikeStyledBomb : public Module<>, public Stateful
               c_ready_led.on();
             else
               c_strikes_bar.next();
-            Serial.print("The current passcode is: ");
-            Serial.println(entered_passcode.c_str());
+            LOG::D("The current passcode is: %", entered_passcode.c_str());
+          }
+          else {
+            LOG::W("Cannot have a passcode with more than % digits!",
+                    PASSCODE_MAX_SIZE);
+            LOG::D("The current passcode is: %", entered_passcode.c_str());
           }
           break;
         }

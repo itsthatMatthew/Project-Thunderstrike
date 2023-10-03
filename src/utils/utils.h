@@ -15,3 +15,4 @@
 #include "utils/hw/rgbled.h"
 #include "utils/hw/status_bar.h"
 #include "utils/sw/circular_buffer.h"
+#include "utils/sw/log.h"
