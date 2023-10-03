@@ -79,7 +79,7 @@ constexpr void LOG(unsigned long time,
                     const char* format, ARG_TYPES ...arg_values)
 {
   // Log debug source information and set console styling.
-  LOG("%.%s\t@%:%:\t%", time / 1000000UL, time % 1000000UL, file, line, highlight);
+  LOG("%.%s @%:%: %", time / 1000000UL, time % 1000000UL, file, line, highlight);
   // Print formatted output.
   LOG(format, arg_values...);
   // Reset console styling.
@@ -97,7 +97,7 @@ constexpr void LOG(unsigned long time,
 /// - '%' substitutes the next value in place.
 /// - '\\' can be used as an escape character.
 #define D(FORMAT, ...) \
-  LOGFWD("\033[37;44;1m D \033[0m\033[34m ", FORMAT, __VA_ARGS__)
+  LOGFWD("\033[37;44;1m D \033[0m\033[34m ", FORMAT, ##__VA_ARGS__)
 
 /// Info style wrapper.
 /// - Write I(value) to log the value.
@@ -105,7 +105,7 @@ constexpr void LOG(unsigned long time,
 /// - '%' substitutes the next value in place.
 /// - '\\' can be used as an escape character.
 #define I(FORMAT, ...) \
-  LOGFWD("\033[37;42;1m I \033[0m\033[32m ", FORMAT, __VA_ARGS__)
+  LOGFWD("\033[37;42;1m I \033[0m\033[32m ", FORMAT, ##__VA_ARGS__)
 
 /// Warning style wrapper.
 /// - Write W(value) to log the value.
@@ -113,7 +113,7 @@ constexpr void LOG(unsigned long time,
 /// - '%' substitutes the next value in place.
 /// - '\\' can be used as an escape character.
 #define W(FORMAT, ...) \
-  LOGFWD("\033[30;43;1m W \033[0m\033[33m ", FORMAT, __VA_ARGS__)
+  LOGFWD("\033[30;43;1m W \033[0m\033[33m ", FORMAT, ##__VA_ARGS__)
 
 /// Error style wrapper.
 /// - Write E(value) to log the value.
@@ -121,7 +121,7 @@ constexpr void LOG(unsigned long time,
 /// - '%' substitutes the next value in place.
 /// - '\\' can be used as an escape character.
 #define E(FORMAT, ...) \
-  LOGFWD("\033[30;41;1m E \033[0m\033[31m ", FORMAT, __VA_ARGS__)
+  LOGFWD("\033[30;41;1m E \033[0m\033[31m ", FORMAT, ##__VA_ARGS__)
 
 } // namespace LOG
 
