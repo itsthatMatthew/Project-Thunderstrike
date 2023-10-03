@@ -33,7 +33,7 @@ namespace PTS
 /// \tparam COLS the number of columns on the physical keypad. 
 /// \tparam ROWS the number of rows on the physical keypad.
 template<size_t COLS, size_t ROWS>
-class Keypad : public Module<>
+class Keypad : public Module<2048>
 {
   /// Inner class for hardware wrapping.
   class PoweredButton
@@ -157,6 +157,8 @@ class Keypad : public Module<>
     std::lock_guard<std::mutex> lock(m_buffer_lock);
 
     m_input_buffer.push(c_char_set[row][col]);
+
+    LOG::D("New value in keypad buffer: %", c_char_set[row][col]);
   }
 
 //===-- Member variables --------------------------------------------------===//
