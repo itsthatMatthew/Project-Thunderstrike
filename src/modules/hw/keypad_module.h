@@ -40,7 +40,7 @@ class Keypad : public Module<2048>
   {
    public:
     // Nulled default init for default ctor (std::array).
-    PoweredButton(const size_t col_num = 0,
+    explicit PoweredButton(const size_t col_num = 0,
                   const size_t row_num = 0,
                   const uint8_t power_pin = 0,
                   const uint8_t read_pin = 0)

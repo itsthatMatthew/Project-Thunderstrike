@@ -1,5 +1,7 @@
 # Ignore PlatformIO build and dependency files.
 .pio
+# Ignore compilation database file (for SonarLint support)
+compile_commands.json
 
 # Ignore Visual Studio Code specific files
 .vscode

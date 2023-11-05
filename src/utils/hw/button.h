@@ -89,7 +89,7 @@ class Button
     StateChange change = static_cast<StateChange>(0b00);
 
     if (currentState() == HIGH) // old state
-      change = static_cast<StateChange>(change | 0b10);
+      change = static_cast<StateChange>(0b10);
 
     if (readNewState() == HIGH) // new state
       change = static_cast<StateChange>(change | 0b01);
