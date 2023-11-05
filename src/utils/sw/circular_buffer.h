@@ -74,6 +74,8 @@ class CircularBuffer {
   {
     if (this != &other)
     {
+      m_write_offset = other.m_write_offset;
+      m_read_offset = other.m_read_offset;
       for (size_t idx = 0; idx != SIZE; idx++)
         m_buffer[idx] = other.m_buffer[idx];
     }
