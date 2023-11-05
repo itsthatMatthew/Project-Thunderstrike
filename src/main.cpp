@@ -15,4 +15,7 @@ void setup() {
 }
 
 void loop() {
+  // No current functionality is necessary as "bomb" runs on a created thread.
+  // The Arduino framework could be swapped in the future in order to get rid of
+  // unnecessary boilerplate code.
 }
