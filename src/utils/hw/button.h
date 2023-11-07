@@ -18,6 +18,7 @@
 #define UTILS_HW_BUTTON_H
 
 #include <Arduino.h>
+#include <optional>
 
 namespace PTS
 {
@@ -101,20 +102,37 @@ class Button
   }
   
   /// Executes a callback depending on the buttons state change.
-  /// \return the callback's result in the set return type, nothing if void.
-  auto update(ARG_TYPES... args) const -> RETURN_TYPE
+  /// \return if the RETURN_TYPE is set to void, the function does not return
+  /// any value (void), otherwise it returns a std::optional with the callback's
+  /// result stored, or empty if no appropriate callback has been set yet.
+  auto update(ARG_TYPES... args) const
   {
-    switch (getStateChange())
-    {
-      case IS_RISING:   if (m_on_rising)   return m_on_rising(args...);   break;
-      case IS_FALLING:  if (m_on_falling)  return m_on_falling(args...);  break;
-      case IS_PRESSED:  if (m_on_pressed)  return m_on_pressed(args...);  break;
-      case IS_RELEASED: if (m_on_released) return m_on_released(args...); break;
+    // If the return type is set to void, just execute the callback.
+    if constexpr (std::is_same_v<void, RETURN_TYPE>) {
+      switch (getStateChange())
+      {
+        case IS_RISING:   if (m_on_rising)   m_on_rising(args...);   break;
+        case IS_FALLING:  if (m_on_falling)  m_on_falling(args...);  break;
+        case IS_PRESSED:  if (m_on_pressed)  m_on_pressed(args...);  break;
+        case IS_RELEASED: if (m_on_released) m_on_released(args...); break;
+      }
     }
+    // If the return type is other than void, return a std::optional.
+    else {
+      std::optional<RETURN_TYPE> result{ /* empty */ };
 
-    // FIXME: in case no callback is set up yet, and control falls through,
-    // *something* should be done here for non-void return types (complex
-    // structures might not have default initializer)
+      switch (getStateChange())
+      {
+        case IS_RISING:   if (m_on_rising)   result = m_on_rising(args...);   break;
+        case IS_FALLING:  if (m_on_falling)  result = m_on_falling(args...);  break;
+        case IS_PRESSED:  if (m_on_pressed)  result = m_on_pressed(args...);  break;
+        case IS_RELEASED: if (m_on_released) result = m_on_released(args...); break;
+      }
+
+      // In case no (or at least the appropriate) callback has been set yet,
+      // an empty std::optional is returned.
+      return result;
+    }
   }
   
   /// Sets the callback called on rising state change.
