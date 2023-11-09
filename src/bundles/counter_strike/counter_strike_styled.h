@@ -29,7 +29,7 @@
 namespace PTS
 {
 
-static const size_t PASSCODE_MAX_SIZE = 4;
+static const size_t PASSCODE_MAX_SIZE = 7; // 7355608
 
 /// CounterStrikeStyledBomb class
 /// Game logic: the bomb first has to be armed ("planted"), until that point, no
@@ -98,7 +98,7 @@ class CounterStrikeStyledBomb : public Module<2024>, public Stateful
             entered_passcode.pop_back();
             if (passocde_size == PASSCODE_MAX_SIZE)
               c_ready_led.off();
-            else
+            else if (passocde_size / 2 == 0)
               c_strikes_bar.back();
             LOG::D("The current passcode is: %", entered_passcode.c_str());
           }
@@ -125,7 +125,7 @@ class CounterStrikeStyledBomb : public Module<2024>, public Stateful
             entered_passcode += read_char.value();
             if (passocde_size == PASSCODE_MAX_SIZE - 1)
               c_ready_led.on();
-            else
+            else if (passocde_size / 2 == 0)
               c_strikes_bar.next();
             LOG::D("The current passcode is: %", entered_passcode.c_str());
           }
