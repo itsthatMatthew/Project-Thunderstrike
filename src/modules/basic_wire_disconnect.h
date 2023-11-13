@@ -1,4 +1,4 @@
-//===-- module/basic_wire_disconnect.h - WireDisconnect class definition --===//
+//===-- modules/basic_wire_disconnect.h - WireDisconnect class definition -===//
 //
 // Project-Thunderstrike (PTS) collection header file.
 // Find more information at:
@@ -18,26 +18,28 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef MODULE_BASIC_WIRE_DISCONNECT_H
-#define MODULE_BASIC_WIRE_DISCONNECT_H
+#ifndef MODULES_BASIC_WIRE_DISCONNECT_H
+#define MODULES_BASIC_WIRE_DISCONNECT_H
 
-#include "module.h"
-#include "utils/button.h"
-#include "utils/rgbled.h"
+#include "module_base.h"
+#include "stateful_base.h"
+#include "utils/hw/button.h"
+#include "utils/hw/rgbled.h"
 
 namespace PTS
 {
 
 /// WireDisconnect class
-class WireDisconnect : public Module<>
+class WireDisconnect : public Module<>, public Stateful
 {
 //===-- Instantiation specific functions ----------------------------------===//
 
  public:
-  explicit WireDisconnect(const char *const name,
+  explicit WireDisconnect(const std::string &name,
                           uint8_t wire_1, uint8_t wire_2, uint8_t wire_3,
                           const RGBLED &led_ref)
   : Module(name),
+    Stateful(),
     c_wire_1(wire_1),
     c_wire_2(wire_2),
     c_wire_3(wire_3),
@@ -133,4 +135,4 @@ class WireDisconnect : public Module<>
 
 } // namespace PTS
 
-#endif // MODULE_BASIC_WIRE_DISCONNECT_H
+#endif // MODULES_BASIC_WIRE_DISCONNECT_H

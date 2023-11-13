@@ -1,4 +1,4 @@
-//===-- utils/rgbled.h - RGBLED utility class definition ------------------===//
+//===-- utils/hw/rgbled.h - RGBLED utility class definition ---------------===//
 //
 // Project-Thunderstrike (PTS) collection header file.
 // Find more information at:
@@ -15,8 +15,8 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef UTILS_RGBLED_H
-#define UTILS_RGBLED_H
+#ifndef UTILS_HW_RGBLED_H
+#define UTILS_HW_RGBLED_H
 
 #include <Arduino.h>
 
@@ -121,4 +121,4 @@ class RGBLED
 
 } // namespace PTS
 
-#endif // UTILS_RGBLED_H
+#endif // UTILS_HW_RGBLED_H

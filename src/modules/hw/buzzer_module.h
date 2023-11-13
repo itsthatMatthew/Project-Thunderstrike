@@ -1,4 +1,4 @@
-//===-- module/buzzer_module.h - Buzzer module base class definition ------===//
+//===-- modules/hw/buzzer_module.h - Buzzer module base class definition --===//
 //
 // Project-Thunderstrike (PTS) collection header file.
 // Find more information at:
@@ -11,10 +11,10 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef MODULE_BUZZER_MODULE_H
-#define MODULE_BUZZER_MODULE_H
+#ifndef MODULES_HW_BUZZER_MODULE_H
+#define MODULES_HW_BUZZER_MODULE_H
 
-#include "module.h"
+#include "modules/module_base.h"
 
 namespace PTS
 {
@@ -26,22 +26,19 @@ class BuzzerModule : public Module<>
 {
 //===-- Instantiation specific functions and threading function -----------===//
  public:
-  explicit BuzzerModule(const char *const name, const uint8_t pin)
-  : Module(name),
-    c_buzzer_pin(pin)
+  explicit BuzzerModule(const std::string &name, const uint8_t pin)
+  : Module(name), c_buzzer_pin(pin)
   { }
 
   /// Sets up buzzer pin and makes the module active.
   void begin() const override
   {
     pinMode(c_buzzer_pin, OUTPUT);
-    this->passState();  
   }
 
   /// Sends power to the buzzer pin at the set regular intervals.
   void threadFunc() const override
   {
-    Serial.println("tf");
     digitalWrite(c_buzzer_pin, HIGH);
     ::delayMicroseconds(/*1/f=*/ 1000000 / BUZZER_TONE);
     digitalWrite(c_buzzer_pin, LOW);
@@ -55,4 +52,4 @@ class BuzzerModule : public Module<>
 
 } // namespace PTS
 
-#endif // MODULE_BUZZER_MODULE_H
+#endif // MODULES_HW_BUZZER_MODULE_H

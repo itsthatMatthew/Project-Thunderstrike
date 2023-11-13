@@ -1,86 +1,85 @@
+//===-- main.cpp - Entry point of the application --==========================//
+//
+// Project-Thunderstrike (PTS) collection source file.
+// Find more information at:
+// https://github.com/itsthatMatthew/Project-Thunderstrike
+//
+//===----------------------------------------------------------------------===//
+///
+/// \file This file contains an example definition of the application entry
+/// point with the Arduino framework.
+/// This example also utilizes a lot of already existing parts project.
+///
+//===----------------------------------------------------------------------===//
+
 #include <Arduino.h>
-#include "module/basic_wire_disconnect.h" 
-#include "module/buzzer_module.h"
-#include "utils/led.h"
+#include "utils/sw/log.h" // Logging header
+#include "net/web_server.h" // WebServer header
+#include "modules/hw/keypad_module.h" // Keypad module
 
-PTS::RGBLED wire_disconnect_status_led(GPIO_NUM_21, GPIO_NUM_22, GPIO_NUM_23);
-PTS::WireDisconnect wire_disconnect("wire disconnect",
-                                    GPIO_NUM_16, GPIO_NUM_17, GPIO_NUM_4,
-                                    wire_disconnect_status_led);
-                                    
-PTS::BuzzerModule<12000> buzzer("buzzer", GPIO_NUM_19);
-PTS::LED builting(LED_BUILTIN);
-uint32_t buzzer_delay = 1000;
+// Set up a web server and get its instance.
+const PTS::WebServer& web_server = PTS::WebServer::instance();
 
+// Create an instance of the keypad module, with the corresponding pins set.
+const PTS::Keypad<3, 4> keypad_module("keypad_module",
+                                      {25, 33, 32}, {35, 34, 39, 36},
+                                      std::array<std::array<char, 3>, 4>{
+                                        std::array<char, 3>{'1', '2', '3'},
+                                        std::array<char, 3>{'4', '5', '6'},
+                                        std::array<char, 3>{'7', '8', '9'},
+                                        std::array<char, 3>{'*', '0', '#'}});
+
+// Setup: the entry point of the application.
 void setup() {
-  //pinMode(GPIO_NUM_19, OUTPUT);
-  //digitalWrite(GPIO_NUM_19, HIGH);
-  //delay(10000);
+  // Set up serial port.
+  // The MONITOR_SPEED is initialized in the platformio.ini file.
+  // This should be done before any print call.
+  Serial.begin(MONITOR_SPEED);
 
-  Serial.begin(115200);
+  // Log that init started, this shows up on the serial monitor.
+  PTS::LOG::D("Initializing started...");
 
-  wire_disconnect.begin();
-  buzzer.begin();
-  builting.begin();
+  // Use the webserver to register a new attribute to be displayed.
+  web_server.registerAttribute("example_attribute",
+                               "example_value",
+                               "This is an example attribute.");
 
-  wire_disconnect.start();
-  buzzer.start();
+  // Setup the keypad and webserver module.
+  keypad_module.begin();
+  web_server.begin();
 
-  //buzzer.suspend();
+  // Register an attribute that will contain the data read by the keypad.
+  web_server.registerAttribute("keypad_buffer_content", "");
+
+  // Start the modules on new threads.
+  keypad_module.start();
+  web_server.start();
+
+  PTS::LOG::I("Initializing finished.");
 }
 
+// Loop: run in succession after the setup function finished.
 void loop() {
-  if (wire_disconnect.getState() == PTS::Module<>::ACTIVE) {
-    buzzer.resume();
-    builting.on();
+  // Update or register (the first time loop will run) attribute.
+  web_server.upsterAttribute("seconds",
+                             std::to_string(millis() / 1000),
+                             "Seconds since startup.");
 
-    delay(100);
+  // Try to read a new value from the keypad. If successful, append it.
+  if (auto keypad_buffer = keypad_module.readOne(); keypad_buffer)
+  {
+    // Read the value of the attribute.
+    char buffer_value = keypad_buffer.value();
+    auto attribute = web_server.readAttribute("keypad_buffer_content").value();
 
-    buzzer.suspend();
-    builting.off();
+    switch (buffer_value)
+    {
+    case '*': if (!attribute.empty()) attribute.pop_back(); break; // Backspace.
+    case '#': attribute.clear(); break; // Clear all.
+    default: attribute += keypad_buffer.value(); break; // Append.
+    }
 
-    delay(buzzer_delay);
-
-    if (buzzer_delay > 100) {
-      buzzer_delay -= 10;
-    }
-    else if (buzzer_delay > 15) {
-      buzzer_delay -= 5;
-    }
-    else if (buzzer_delay > 1) {
-      buzzer_delay -= 1;
-    }
-    else {
-      wire_disconnect.failState();
-    }
-  }
-  else if (wire_disconnect.getState() == PTS::Module<>::FAILED) {
-    static bool has_ran = false;
-    if (!has_ran) { // once
-      has_ran = true;
-      buzzer.resume();
-      delay(2000);
-      buzzer.destroy();
-      wire_disconnect.destroy();
-    }
-  }
-  else if (wire_disconnect.getState() == PTS::Module<>::PASSED) {
-    static bool has_ran = false;
-    if (!has_ran) { // once
-      has_ran = true;
-      buzzer.resume();
-      delay(50);
-      buzzer.suspend();
-      delay(50);
-      buzzer.resume();
-      delay(50);
-      buzzer.suspend();
-      delay(50);
-      buzzer.resume();
-      delay(50);
-      buzzer.suspend();
-      buzzer.destroy();
-      wire_disconnect.destroy();
-    }
+    // Update the attribute.
+    web_server.updateAttribute("keypad_buffer_content", attribute);
   }
 }

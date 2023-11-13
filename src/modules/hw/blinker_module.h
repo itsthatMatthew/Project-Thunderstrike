@@ -1,4 +1,4 @@
-//===-- module/blinker_module.h - Blinker module base class definition ----===//
+//===-- modules/blinker_module.h - Blinker module base class definition ---===//
 //
 // Project-Thunderstrike (PTS) collection header file.
 // Find more information at:
@@ -11,11 +11,11 @@
 ///
 //===----------------------------------------------------------------------===//
 
-#ifndef MODULE_BLINKER_MODULE_H
-#define MODULE_BLINKER_MODULE_H
+#ifndef MODULES_HW_BLINKER_MODULE_H
+#define MODULES_HW_BLINKER_MODULE_H
 
-#include "module.h"
-#include "utils/led.h"
+#include "modules/module_base.h"
+#include "utils/hw/led.h"
 
 namespace PTS
 {
@@ -25,16 +25,14 @@ class BlinkerModule : public Module<>
 {
 //===-- Instantiation specific functions and threading function -----------===//
  public:
-  explicit BlinkerModule(const char *const name, const uint8_t pin)
-  : Module(name),
-    blinker(pin)
+  explicit BlinkerModule(const std::string &name, const uint8_t pin)
+  : Module(name), blinker(pin)
   { }
   
   /// Sets up blinker pin and makes the module active.
   void begin() const override
   {
     blinker.begin();
-    this->passState();
   }
 
   /// Turns the blinker on and off at the set intervals.
@@ -53,4 +51,4 @@ class BlinkerModule : public Module<>
 
 } // namespace PTS
 
-#endif // MODULE_BLINKER_MODULE_H
+#endif // MODULES_HW_BLINKER_MODULE_H
