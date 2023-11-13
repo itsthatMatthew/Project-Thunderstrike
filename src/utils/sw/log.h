@@ -152,7 +152,7 @@ constexpr void LOG_SRC(unsigned long time,
                     const char* format, ARG_TYPES ...arg_values)
 {
   // Log time information
-  LOG("%.%s\t@", time / 1000000UL, time % 1000000UL);
+  LOG("%.%s  @", time / 1000000UL, time % 1000000UL / 1000UL);
   // Log the source file-line location (width a fixed width for readability)
   LOG_FIXED_WITH_STRING(source, 51);
   // Set highlight & coloring
