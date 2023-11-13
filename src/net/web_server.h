@@ -27,10 +27,11 @@
 namespace PTS
 {
 
-/// WebServer class
+/// WebServer singleton class
 class WebServer : public Module<4*1024, tskIDLE_PRIORITY, 2>
 {
  private:
+  /// Private constructor to implement singleton behaviour.
   explicit WebServer()
     : Module("webserver_module"),
       wifi_server(WiFiServer(80)),
@@ -54,7 +55,7 @@ class WebServer : public Module<4*1024, tskIDLE_PRIORITY, 2>
   /// \return false, if the attribute already exists, true otherwise.
   bool registerAttribute(const std::string &name,
                          const std::string &value = "nil",
-                         const std::string &description = "nil") const
+                         const std::string &description = "") const
   {
     std::lock_guard<std::mutex> lock(m_attributes_lock);
 
@@ -85,7 +86,7 @@ class WebServer : public Module<4*1024, tskIDLE_PRIORITY, 2>
   /// \param description the description of the attribute (does not update).
   void upsterAttribute(const std::string &name,
                        const std::string &value,
-                       const std::string &description = "nil") const
+                       const std::string &description = "") const
   {
     std::lock_guard<std::mutex> lock(m_attributes_lock);
     
