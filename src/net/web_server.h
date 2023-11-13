@@ -161,7 +161,12 @@ class WebServer : public Module<4*1024, tskIDLE_PRIORITY, 2>
               client.println("<style>body{font-family:Arial;background-color:#2c3e50;color:#ecf0f1;}table{font-size:3vw;text-align:center;}th{font-weight:bold;}td{font-weight:normal;padding:1vw;border-top:solid#ecf0f1;}</style>");
               client.println("</head>");
               client.println("<body>");
-              client.println("<h1>ESP32 Web Server</h1>");
+              client.println("<h1>PTS Web Server</h1>");
+              client.print("<p>You are connected on ");
+              client.print(client.remoteIP());
+              client.print(":");
+              client.print( client.remotePort());
+              client.println("</p>");
               client.print("<h2>Registered attributes:<h2>");
               client.println("<table>");
               client.println("<tr><th>Name</th><th>Value</th><th>Description</th></tr>");
