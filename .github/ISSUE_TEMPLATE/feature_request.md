@@ -19,9 +19,3 @@ Any ideas or suggestions for how this feature could be implemented, if you have 
 **Additional Context:**
 
 Any additional information or context that might help in understanding the feature request.
-
-**Environment:**
-
-- ESP32 Board Model: [e.g., ESP32-WROOM-32]
-- PlatformIO Version: [e.g., 5.2.1]
-- Operating System: [e.g., Windows 10]
