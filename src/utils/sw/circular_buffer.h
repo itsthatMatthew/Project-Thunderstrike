@@ -76,8 +76,7 @@ class CircularBuffer {
     {
       m_write_offset = other.m_write_offset;
       m_read_offset = other.m_read_offset;
-      for (size_t idx = 0; idx != SIZE; idx++)
-        m_buffer[idx] = other.m_buffer[idx];
+      std::copy(std::begin(other.m_buffer), std::end(other.m_buffer), m_buffer);
     }
     return *this;
   }
@@ -143,7 +142,7 @@ class CircularBuffer {
   /// \return the corrected offset value.
   size_type correct_wrap(size_type offset) const noexcept
   {
-    return offset % SIZE;
+    return offset % (SIZE + 1);
   }
 
 //===-- Members ---------------------------------------------------------===//
@@ -151,7 +150,7 @@ class CircularBuffer {
  private:
   size_type m_write_offset;
   size_type m_read_offset;
-  TYPE m_buffer[SIZE];
+  TYPE m_buffer[SIZE + 1];
 }; // class CircularBuffer
 
 } // namespace PTS
