@@ -128,6 +128,8 @@ class WebServer : public Module<4*1024, tskIDLE_PRIORITY, 2>
     ip_address = WiFi.softAPIP();
     wifi_server.begin();
     LOG::I("AP created, IP: %", ip_address);
+
+    Module::begin();
   }
 
   void threadFunc() const override

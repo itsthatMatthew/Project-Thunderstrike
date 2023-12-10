@@ -36,28 +36,51 @@ template<uint32_t STACK_DEPTH = 1024,
          uint32_t FREQUENCY = 10>
 class Module
 {
+
+enum class State_e : uint8_t
+{
+  CREATED,
+  INITIALIZED,
+  ACTIVE,
+  SUSPENDED,
+  DESTROYED
+};
+
 //===-- Instantiation specific functions ----------------------------------===//
 
  public:
   /// \param module_name the object's and starting thread's name.
   explicit Module(const std::string &module_name)
     : c_module_name(module_name),
+      m_module_state(Module::State_e::CREATED),
       m_task_handle(nullptr),
       m_handle_lock(/*default*/)
   { LOG::I("Module \"%\" constructed.", module_name.c_str()); }
   
   /// Virtual destructor.
-  virtual ~Module() = default;
+  virtual ~Module()
+  {
+    suspend();
+    destroy();
+  }
 
   /// Deleted copy ctor and assignment operator - a module should not be copied.
   Module(const Module&) = delete;
   Module& operator=(const Module&) = delete;
 
-  /// Setup function for additional component initializations.
-  virtual void begin() const = 0;
-
   /// \return the module's name.
   [[nodiscard]] std::string getName() const { return c_module_name; }
+
+  /// Setup function for additional component initializations.
+  virtual void begin() const {
+    std::lock_guard<std::mutex> lock(m_handle_lock);
+
+    if (m_module_state == State_e::CREATED)
+      m_module_state = State_e::INITIALIZED;
+    else
+      LOG::W("Module \"%\" could not begin: state is not CREATED!",
+        c_module_name.c_str());
+  }
 
 //===-- Threading specific functions --------------------------------------===//
 
@@ -65,9 +88,21 @@ class Module
   virtual void threadFunc() const = 0;
 
   /// Creates a thread for the object running threadFunc().
-  void start() const
+  virtual void start() const
   {
+    if (m_module_state == State_e::CREATED) begin();
+
     std::lock_guard<std::mutex> lock(m_handle_lock);
+
+    if (m_module_state == State_e::INITIALIZED)
+      m_module_state = State_e::ACTIVE;
+    else
+    {
+      LOG::W("Module \"%\" could not start: state is not INITIALIZED!",
+        c_module_name.c_str());
+      return;
+    }
+
     // only start new thread if none exists yet
     if (!m_task_handle)
     {
@@ -111,6 +146,15 @@ class Module
   {
     std::lock_guard<std::mutex> lock(m_handle_lock);
 
+    if (m_module_state == State_e::ACTIVE)
+      m_module_state = State_e::SUSPENDED;
+    else
+    {
+      LOG::W("Module \"%\" could not be suspended: state is not ACTIVE!",
+        c_module_name.c_str());
+      return;
+    }
+
     if (m_task_handle)
     {
       vTaskSuspend(m_task_handle);
@@ -123,6 +167,15 @@ class Module
   {
     std::lock_guard<std::mutex> lock(m_handle_lock);
 
+    if (m_module_state == State_e::SUSPENDED)
+      m_module_state = State_e::ACTIVE;
+    else
+    {
+      LOG::W("Module \"%\" could not be resumed: state is not SUSPENDED!",
+        c_module_name.c_str());
+      return;
+    }
+
     if (m_task_handle)
     {
       vTaskResume(m_task_handle);
@@ -133,7 +186,18 @@ class Module
   /// Deletes the object's thread.
   void destroy() const
   {
+    if (m_module_state == State_e::ACTIVE) suspend();
+
     std::lock_guard<std::mutex> lock(m_handle_lock);
+
+    if (m_module_state == State_e::SUSPENDED)
+      m_module_state = State_e::DESTROYED;
+    else
+    {
+      LOG::W("Module \"%\" could not be destroyed: state is not SUSPENDED!",
+        c_module_name.c_str());
+      return;
+    }
 
     if (m_task_handle)
     {
@@ -147,6 +211,7 @@ class Module
 
  private:
   const std::string c_module_name;
+  mutable Module::State_e m_module_state;
   mutable TaskHandle_t m_task_handle;
   mutable std::mutex m_handle_lock;
 }; // class Module

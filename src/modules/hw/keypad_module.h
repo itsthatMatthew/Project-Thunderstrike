@@ -111,6 +111,8 @@ class Keypad : public Module<2048>
     for (size_t col_num = 0; col_num != COLS; col_num++)
       for (size_t row_num = 0; row_num != ROWS; row_num++)
         m_buttons[row_num][col_num].begin();
+        
+    Module::begin();
   }
 
 //===-- Input handling functions ------------------------------------------===//
