@@ -45,8 +45,8 @@ void setup() {
                                "This is an example attribute.");
 
   // Setup the keypad and webserver module.
-  keypad_module.begin();
-  web_server.begin();
+  // keypad_module.begin();
+  // web_server.begin();
 
   // Register an attribute that will contain the data read by the keypad.
   web_server.registerAttribute("keypad_buffer_content", "");

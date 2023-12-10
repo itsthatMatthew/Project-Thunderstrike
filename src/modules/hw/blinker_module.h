@@ -33,6 +33,8 @@ class BlinkerModule : public Module<>
   void begin() const override
   {
     blinker.begin();
+
+    Module::begin();
   }
 
   /// Turns the blinker on and off at the set intervals.
