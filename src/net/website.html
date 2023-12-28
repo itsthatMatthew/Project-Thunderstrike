@@ -1,3 +1,9 @@
+<!--Project-Thunderstrike collection html source.-->
+<!--Find more information at:-->
+<!--https://github.com/itsthatMatthew/Project-Thunderstrike-->
+
+<!--This file contains the html source code from the web server to be rendered on the client.-->
+
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -25,6 +31,25 @@
   </head>
   <body>
     <h1>PTS Web Server</h1>
-    <!-- this is a comment -->
+    <table id="attributes_table">
+      <caption>Table containing the registered attributes.</caption>
+      <tr>
+        <th>Name</th>
+        <th>Value</th>
+        <th>Description</th>
+      </tr>
+    </table>
+    <script>
+      fetch('/getAttributes').then(response => response.json()).then(jsonResponse => {
+        var table = document.getElementById('attributes_table');
+        jsonResponse.forEach(element => {
+          var row = document.createElement('tr');
+          row.innerHTML = '<td>' + element.name + '</td>' +
+          '<td>' + element.value + '</td>' +
+          '<td>' + element.desc + '</td>';
+          table.appendChild(row);
+        });
+      });
+    </script>
   </body>
 </html>
