@@ -18,7 +18,7 @@ jobs:
         with:
           python-version: '3.9'
 
-      -name: Install Beautiful Soup
+      - name: Install Beautiful Soup
         run: pip install beautifulsoup4
 
       - name: Install PlatformIO Core
