@@ -26,9 +26,9 @@ WarningText = 'THIS IS AN AUTOMATICALLY GENERATED FILE, DO NOT MODIFY IT DIRECTL
 with open(Path + Filename + '.html', 'r') as html_file:
   raw_html = BeautifulSoup(html_file.read(), 'html.parser')
 
-for element in raw_html.body:
+for element in raw_html:
   if isinstance(element, Comment):
-    element.extract().split()
+    element.extract()
 
 clean_html = ''
 for line in str(raw_html).splitlines():
@@ -37,4 +37,4 @@ for line in str(raw_html).splitlines():
 with open(Path + Filename + '.h', 'w') as header_file:
   header_file.write(f'/*{WarningText}*/\n#ifndef {IncludeGuard}\n#define {IncludeGuard}\n#include <Arduino.h>\nconstexpr char website_content[] PROGMEM = R"###({clean_html})###";\n#endif')
 
-print(f'Generated C-style char array with a size of {len(clean_html) + 1}')
+print(f'HTML CONVERTER: Generated C-style char array with a size of {len(clean_html) + 1} bytes.')
