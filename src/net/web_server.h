@@ -24,6 +24,8 @@
 #include "modules/module_base.h"
 #include "utils/sw/log.h"
 
+#include "website.h"
+
 namespace PTS
 {
 
@@ -156,6 +158,8 @@ class WebServer : public Module<4*1024, tskIDLE_PRIORITY, 2>
               client.println("Content-type:text/html");
               client.println("Connection: close");
               client.println();
+
+              //client.println(website_content);
 
               client.println("<!DOCTYPE html><html>");
               client.println("<head>");
