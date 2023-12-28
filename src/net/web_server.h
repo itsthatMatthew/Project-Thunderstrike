@@ -20,7 +20,11 @@
 #include <map>
 #include <string>
 #include <optional>
+
 #include <WiFi.h>
+#include <AsyncTCP.h>
+#include <ESPAsyncWebServer.h>
+
 #include "modules/module_base.h"
 #include "utils/sw/log.h"
 
@@ -36,8 +40,7 @@ class WebServer : public Module<4*1024, tskIDLE_PRIORITY, 2>
   /// Private constructor to implement singleton behaviour.
   explicit WebServer()
     : Module("webserver_module"),
-      wifi_server(WiFiServer(80)),
-      ip_address(),
+      web_server(80),
       m_attributes(),
       m_attributes_lock()
   { }
@@ -126,98 +129,53 @@ class WebServer : public Module<4*1024, tskIDLE_PRIORITY, 2>
   void begin() const override
   {
     LOG::I("Setting up AP...");
+
     WiFi.softAP("PTS-AP", nullptr);
-    ip_address = WiFi.softAPIP();
-    wifi_server.begin();
-    LOG::I("AP created, IP: %", ip_address);
+
+    web_server.on("/", HTTP_GET, [](AsyncWebServerRequest *request)
+    {
+      request->send(200, "html", website_content);
+    });
+
+    web_server.on("/getAttributes", HTTP_GET, [&](AsyncWebServerRequest *request)
+    {
+      std::string json_response = "[";
+
+      for (const auto attribute : m_attributes)
+      {
+        const auto [name, data] = attribute;
+        const auto [value, desc] = data;
+
+        json_response += std::string{"{"} +
+          "\"name\":\"" + name + "\"," +
+          "\"value\":\"" + value + "\"," +
+          "\"desc\":\"" + desc + "\"" +
+        "},";
+      }
+
+      json_response.pop_back(); // remove trailing comma
+      json_response += "]";
+
+      request->send(200, "json", json_response.c_str());
+    });
+
+    web_server.onNotFound([](AsyncWebServerRequest *request)
+    {
+      request->send(404, "text/plain", "Not found");
+    });
+
+    web_server.begin();
+
+    LOG::I("AP created, IP: %", WiFi.localIP());
 
     Module::begin();
   }
 
   void threadFunc() const override
-  {
-    WiFiClient client = wifi_server.available();
-    
-    if (client)
-    {
-      LOG::D("New client connected @ %:%", client.remoteIP(), client.remotePort());
-      String current_line = "";
-
-      while (client.connected())
-      {
-        if (client.available())
-        {
-          char c = client.read();
-
-          if (c == '\n')
-          {
-            if (current_line.length() == 0) {
-            std::lock_guard<std::mutex> lock(m_attributes_lock);
-
-              client.println("HTTP/1.1 200 OK");
-              client.println("Content-type:text/html");
-              client.println("Connection: close");
-              client.println();
-
-              //client.println(website_content);
-
-              client.println("<!DOCTYPE html><html>");
-              client.println("<head>");
-              client.println("<title>Title of the document</title>");
-              client.println("<meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">");
-              client.println("<style>body{font-family:Arial;background-color:#2c3e50;color:#ecf0f1;}table{font-size:3vw;text-align:center;}th{font-weight:bold;}td{font-weight:normal;padding:1vw;border-top:solid#ecf0f1;}</style>");
-              client.println("</head>");
-              client.println("<body>");
-              client.println("<h1>PTS Web Server</h1>");
-              client.print("<p>You are connected on ");
-              client.print(client.remoteIP());
-              client.print(":");
-              client.print( client.remotePort());
-              client.println("</p>");
-              client.print("<h2>Registered attributes:<h2>");
-              client.println("<table>");
-              client.println("<tr><th>Name</th><th>Value</th><th>Description</th></tr>");
-              for (auto attribute : m_attributes)
-              {
-                client.print("<tr>");
-                client.print("<td>");
-                client.print(attribute.first.c_str());
-                client.print("</td>");
-                client.print("<td>");
-                client.print(attribute.second.first.c_str());
-                client.print("</td>");
-                client.print("<td>");
-                client.print(attribute.second.second.c_str());
-                client.print("</td>");
-                client.println("</tr>");
-              }
-              client.println("</table>");
-              client.println("</body>");
-              client.println("</html>");
-              client.println();
-
-              break;
-            }
-            else 
-            {
-              current_line = "";
-            }
-          }
-          else if (c != '\r')
-          {
-            current_line += c;
-          }
-        }
-      }
-
-      client.stop();
-      LOG::D("Client disconnected.");
-    }
-  }
+  { }
 
  private:
-  mutable WiFiServer wifi_server;
-  mutable IPAddress ip_address;
+  mutable AsyncWebServer web_server;
   mutable std::map<std::string, std::pair<std::string, std::string>> m_attributes;
   mutable std::mutex m_attributes_lock;
 }; // class WebServer
